@@ -166,17 +166,34 @@
   }
 }
 
-
 .category-container {
   padding: 2rem 1rem;
 }
 
-.category-title {
+.category-header-wrapper {
   text-align: center;
   margin-bottom: 2rem;
+}
+
+.category-main-header {
+  position: relative;
+  display: inline-block;
   font-size: 2rem;
   color: #333;
   font-weight: 600;
+  margin-bottom: 1.5rem;
+  padding-bottom: 15px; /* Space between text and underline */
+}
+
+.category-main-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background-color: #333;
 }
 
 .category-grid {
@@ -201,14 +218,14 @@
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
-.category-image-container {
+.category-img-container {
   height: 0;
   padding-bottom: 100%; /* Square aspect ratio */
   position: relative;
   overflow: hidden;
 }
 
-.category-image {
+.category-img {
   position: absolute;
   top: 0;
   left: 0;
@@ -218,11 +235,11 @@
   transition: transform 0.3s ease;
 }
 
-.category-card:hover .category-image {
+.category-card:hover .category-img {
   transform: scale(1.05);
 }
 
-.category-body {
+.category-card-body {
   padding: 1rem;
   flex-grow: 0;
 }
@@ -231,12 +248,53 @@
   font-size: 1.1rem;
   font-weight: 500;
   color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.category-arrow {
+  font-size: 0.8rem;
+  transition: transform 0.3s ease;
+}
+
+.category-card:hover .category-arrow {
+  transform: translateX(3px);
+}
+
+.category-subtext {
+  font-size: 0.9rem;
+  color: #6c757d;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.category-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.category-spinner {
+  margin-bottom: 1rem;
+}
+
+.category-loading-text {
+  color: #333;
+}
+
+.category-error-alert {
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .category-title {
+  .category-main-header {
     font-size: 1.75rem;
+    padding-bottom: 12px;
   }
   
   .category-name {
@@ -249,58 +307,11 @@
     padding: 1.5rem 0.5rem;
   }
   
-  .category-title {
+  .category-main-header {
     font-size: 1.5rem;
     margin-bottom: 1.5rem;
+    padding-bottom: 10px;
   }
-}
-
-
-/* Add to your existing CSS */
-/* Add to your existing CSS */
-.hover-effect {
-  transition: all 0.3s ease;
-  cursor: pointer;
-  height: 100%;
-}
-
-.hover-effect:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15) !important;
-}
-
-.view-all-card {
-  background-color: #f8f9fa;
-  border: 2px dashed #dee2e6;
-  height: 100%;
-  min-height: 250px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-}
-
-.view-all-card:hover {
-  background-color: #e9ecef;
-  border-color: #adb5bd;
-}
-
-.view-all-content h3 {
-  color: #495057;
-  margin-bottom: 0.5rem;
-}
-
-.view-all-content p {
-  font-size: 0.9rem;
-}
-
-/* Hide scrollbar but keep functionality */
-.d-flex.flex-nowrap.overflow-auto {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.d-flex.flex-nowrap.overflow-auto::-webkit-scrollbar {
-  display: none;
 }
 
 

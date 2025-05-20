@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Spinner, Alert } from 'react-bootstrap';
 import { FaChevronRight } from 'react-icons/fa';
-import './heroSlider.css'; // We'll create this CSS file
+import './heroSlider.css';
 
 import bottomImg from '../images/bottom.jpeg';
 import poloImg from '../images/polo.jpeg';
@@ -45,9 +45,8 @@ export default function Category() {
 
   return (
     <Container className="category-container py-5">
-      <div className="category-header-wrapper mb-5">
+      <div className="category-header-wrapper">
         <h1 className="category-main-header">Shop by Category</h1>
-        <div className="category-header-decoration"></div>
       </div>
 
       {loading && (
