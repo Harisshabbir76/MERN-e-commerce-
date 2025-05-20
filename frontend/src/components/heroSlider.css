@@ -193,7 +193,7 @@
   transform: translateX(-50%);
   width: 80px;
   height: 3px;
-  background-color: #333;
+  background: linear-gradient(90deg, #3498db, #9b59b6);
 }
 
 .category-grid {
