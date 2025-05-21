@@ -11,9 +11,24 @@ const path = require('path');
 const ContactUs = require('./Models/ContactUs');
 const Order = require('./Models/Order');
 const Review=require('./Models/Review');
+const axios = require('axios');
+const nodemailer = require('nodemailer');
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+
+
+
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail', // or your email service
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
 
 
 
@@ -206,6 +221,36 @@ app.post('/contactUs',async(req,res)=>{
     }
 })
 
+app.get('/contactus/show',async(req,res)=>{
+    try{
+        const messages=await ContactUs.find()
+        res.status(200).json(messages)
+    }catch(err){
+        console.error(err)
+        res.status(500).json({error:"Server Error"})
+    }
+})
+
+
+app.post('/contactus/reply', async (req, res) => {
+    try {
+        const { to, subject, text } = req.body;
+
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to,
+            subject,
+            text
+        };
+
+        await transporter.sendMail(mailOptions);
+        res.status(200).json({ success: true });
+    } catch (err) {
+        console.error('Error sending email:', err);
+        res.status(500).json({ error: 'Failed to send email' });
+    }
+});
+
 
 app.get('/new-arrival', async (req, res) => {
     try {
@@ -316,6 +361,27 @@ app.put('/allOrder/:id/status', async (req, res) => {
   }
 });
 
+
+
+
+app.get('/verify-whatsapp/:phone', async (req, res) => {
+  try {
+    const { phone } = req.params;
+    const whatsappApiUrl = `https://api.whatsapp.com/send?phone=${phone}`;
+    
+    // You might want to use a proper WhatsApp Business API here
+    // This is just a placeholder implementation
+    
+    res.json({
+      success: true,
+      hasWhatsApp: true, // In a real implementation, you'd check this
+      whatsappUrl: whatsappApiUrl
+    });
+  } catch (error) {
+    console.error('WhatsApp verification error:', error);
+    res.status(500).json({ success: false, error: 'Verification failed' });
+  }
+});
 
 
 

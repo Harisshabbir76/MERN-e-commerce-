@@ -58,6 +58,8 @@ export default function Dashboard() {
             <p>Use the navigation menu to access different sections of the application.</p>
             <button onClick={() => navigate('/dashboard/add-product')}>Add Product</button>
             <button onClick={() => navigate('/dashboard/order-management')}>Order Management</button>
+            <button onClick={() => navigate('/dashboard/contactus')}>Contact Us</button>
+
         </div>
     );
 }

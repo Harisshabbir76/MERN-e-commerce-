@@ -22,6 +22,8 @@ import Checkout from './components/Checkout'
 import NotFoundPage from './components/404'
 import Logout from './components/Logout'
 import OrderManagement from "./components/OrderManagement"; 
+import DashboardContactUs from './components/contact-us'
+
 function App() {
   return (
     <Router>
@@ -46,6 +48,7 @@ function App() {
            <Route path="/404" element={<NotFoundPage />} />
           <Route path="/logout" element={<Logout />} />
           <Route path="/dashboard/order-management" element={<OrderManagement />} />
+          <Route path="/dashboard/contactus" element={<DashboardContactUs />} />
            <Route path="*" element={<Navigate to="/404" />} />
 
         </Routes>
