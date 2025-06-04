@@ -11,7 +11,7 @@ const RecommendedProducts = ({ currentProductId, category }) => {
   useEffect(() => {
     const fetchRecommendedProducts = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/category/${encodeURIComponent(category)}`);
+        const res = await axios.get(`sublime-magic-production.up.railway.app/category/${encodeURIComponent(category)}`);
         // Filter out the current product and limit to 4 recommendations
         const filteredProducts = res.data
           .filter(product => product._id !== currentProductId)
@@ -50,7 +50,7 @@ const RecommendedProducts = ({ currentProductId, category }) => {
             <Card as={Link} to={`/product/${product.slug}`} className="h-100 text-decoration-none">
               <Card.Img
                 variant="top"
-                src={`http://localhost:5000${product.image[0]}`}
+                src={`sublime-magic-production.up.railway.app${product.image[0]}`}
                 alt={product.name}
                 style={{
                   height: '180px',

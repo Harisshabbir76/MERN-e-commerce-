@@ -28,7 +28,7 @@ export default function CategoryProducts() {
 
     const fetchProducts = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/category/${encodeURIComponent(categoryName)}`);
+        const res = await axios.get(`sublime-magic-production.up.railway.app/category/${encodeURIComponent(categoryName)}`);
         setProducts(res.data.map(product => ({
           ...product,
           // Use actual stock value if provided, otherwise default to random stock (5-20)

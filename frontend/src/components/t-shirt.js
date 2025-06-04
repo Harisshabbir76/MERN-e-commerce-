@@ -14,7 +14,7 @@ export default function TshirtProducts() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/catalog');
+        const res = await axios.get('sublime-magic-production.up.railway.app/catalog');
         const filtered = res.data.filter(product => 
           product.category.toLowerCase() === 't-shirt'
         );

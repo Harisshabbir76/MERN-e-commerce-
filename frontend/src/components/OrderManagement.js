@@ -46,7 +46,7 @@ const OrderManagement = () => {
           return;
         }
 
-        const response = await axios.get('http://localhost:5000/auth/me', {
+        const response = await axios.get('sublime-magic-production.up.railway.app/auth/me', {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -72,7 +72,7 @@ const OrderManagement = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/allOrder');
+      const response = await axios.get('sublime-magic-production.up.railway.app/allOrder');
       setOrders(response.data);
     } catch (error) {
       console.error('Error fetching orders:', error);
@@ -83,7 +83,7 @@ const OrderManagement = () => {
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      await axios.put(`http://localhost:5000/allOrder/${orderId}/status`, {
+      await axios.put(`sublime-magic-production.up.railway.app/allOrder/${orderId}/status`, {
         status: newStatus
       });
       fetchOrders();

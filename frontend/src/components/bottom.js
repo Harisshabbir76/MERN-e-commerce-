@@ -14,7 +14,7 @@ export default function BottomProducts() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/catalog');
+        const res = await axios.get('sublime-magic-production.up.railway.app/catalog');
         const filtered = res.data.filter(product => 
           product.category.toLowerCase() === 'bottom'
         );
@@ -67,7 +67,7 @@ export default function BottomProducts() {
               <div className="bottom-img-container">
                 <Card.Img
                   variant="top"
-                  src={`http://localhost:5000${product.image?.[0] || '/placeholder.jpg'}`}
+                  src={`sublime-magic-production.up.railway.app${product.image?.[0] || '/placeholder.jpg'}`}
                   alt={product.name}
                   className="bottom-img"
                 />

@@ -28,7 +28,7 @@ const SearchResults = () => {
     const fetchResults = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`http://localhost:5000/search?query=${query}`);
+        const response = await axios.get(`sublime-magic-production.up.railway.app/search?query=${query}`);
         setResults(response.data.map(product => ({
           ...product,
           stock: product.stock || Math.floor(Math.random() * 16) + 5
@@ -108,7 +108,7 @@ const SearchResults = () => {
                 >
                   <Card.Img
                     variant="top"
-                    src={`http://localhost:5000${product.image?.[0] || '/placeholder.jpg'}`}
+                    src={`sublime-magic-production.up.railway.app${product.image?.[0] || '/placeholder.jpg'}`}
                     style={{ 
                       height: '200px', 
                       objectFit: 'cover',

@@ -70,7 +70,7 @@ export default function Checkout() {
         paymentMethod: 'cash-on-delivery'
       };
 
-      const response = await axios.post('http://localhost:5000/orders', orderData);
+      const response = await axios.post('sublime-magic-production.up.railway.app/orders', orderData);
       
       if (response.status === 201) {
         setShowSuccess(true);

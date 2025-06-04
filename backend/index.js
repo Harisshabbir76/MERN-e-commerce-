@@ -62,6 +62,11 @@ mongoose.connect(MONGO_URI, {
 
 // Routes
 
+app.get('/', (req, res) => {
+  res.send('Welcome to the E-Commerce API 🚀');
+});
+
+
 app.post('/signup',async(req,res)=>{
     const{name,age,username,email,password}=req.body
     try{

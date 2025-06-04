@@ -52,7 +52,7 @@ export default function AddProduct() {
     }
 
     try {
-      await axios.post('http://localhost:5000/dashboard/add-product', data, {
+      await axios.post('sublime-magic-production.up.railway.app/dashboard/add-product', data, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -85,7 +85,7 @@ export default function AddProduct() {
           return;
         }
         
-        const response = await axios.get('http://localhost:5000/auth/me', {
+        const response = await axios.get('sublime-magic-production.up.railway.app/auth/me', {
           headers: {
             Authorization: `Bearer ${token}`
           }
