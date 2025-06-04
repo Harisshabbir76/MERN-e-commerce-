@@ -9,23 +9,37 @@ export default function TshirtProducts() {
   const [tshirts, setTshirts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { addToCart } = useCart(); // Get addToCart function from context
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get('sublime-magic-production.up.railway.app/catalog');
-        const products = Array.isArray(res.data) ? res.data : res.data.products || [];
-        const filtered = products.filter(product =>
+        const res = await axios.get('https://sublime-magic-production.up.railway.app/catalog');
+        
+        // Safely extract products array from response
+        let products = [];
+        if (Array.isArray(res.data)) {
+          products = res.data;
+        } else if (res.data?.products && Array.isArray(res.data.products)) {
+          products = res.data.products;
+        } else if (res.data?.items && Array.isArray(res.data.items)) {
+          products = res.data.items;
+        } else {
+          throw new Error('Invalid products data format');
+        }
+        
+        // Filter for t-shirts
+        const filtered = products.filter(product => 
           product.category?.toLowerCase() === 't-shirt'
         );
 
         if (filtered.length === 0) {
-          throw new Error('No t-shirts found in our collection');
+          setError('No t-shirts found in our collection');
+        } else {
+          setTshirts(filtered);
         }
-        setTshirts(filtered);
       } catch (err) {
-        setError(err.message);
+        setError(err.message || 'Failed to load products');
       } finally {
         setLoading(false);
       }
@@ -37,9 +51,9 @@ export default function TshirtProducts() {
   const handleAddToCart = (product) => {
     addToCart({
       ...product,
-      quantity: 1 // Default quantity
+      quantity: 1
     });
-    // You can add a toast notification here if needed
+    // Optional: Add toast notification here
   };
 
   return (
@@ -49,61 +63,76 @@ export default function TshirtProducts() {
         <div className="header-decoration"></div>
       </div>
       
-      {loading && (
+      {loading ? (
         <div className="text-center my-5 py-5">
           <Spinner animation="border" variant="primary" />
           <p className="mt-3">Loading t-shirts...</p>
         </div>
-      )}
-
-      {error && (
+      ) : error ? (
         <Alert variant="info" className="text-center">
           {error}
         </Alert>
-      )}
-
-      <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-        {tshirts.map(product => (
-          <Col key={product._id}>
-            <Card className="product-card h-100 border-0 shadow-sm">
-              <div className="product-image-container">
-                <Card.Img
-                  variant="top"
-                  src={`sublime-magic-production.up.railway.app${product.image?.[0] || '/placeholder.jpg'}`}
-                  alt={product.name}
-                  className="product-img"
-                />
-                {product.discountedPrice < product.originalPrice && (
-                  <div className="discount-badge">
-                    {Math.round(100 - (product.discountedPrice / product.originalPrice * 100))}% OFF
-                  </div>
-                )}
-              </div>
-              <Card.Body className="d-flex flex-column">
-                <Card.Title className="product-title">{product.name}</Card.Title>
-                <Card.Text className="text-muted product-category">{product.category}</Card.Text>
-                <div className="mt-auto">
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <div className="price">
-                      {product.discountedPrice < product.originalPrice && (
-                        <span className="original-price">${product.originalPrice}</span>
-                      )}
-                      <span className="current-price">${product.discountedPrice}</span>
+      ) : (
+        <Row xs={1} sm={2} md={3} lg={4} className="g-4">
+          {tshirts.map(product => (
+            <Col key={product._id || product.id}>
+              <Card className="product-card h-100 border-0 shadow-sm">
+                <div className="product-image-container">
+                  <Card.Img
+                    variant="top"
+                    src={
+                      product.image?.[0] 
+                        ? `https://sublime-magic-production.up.railway.app${product.image[0]}`
+                        : '/placeholder.jpg'
+                    }
+                    alt={product.name}
+                    className="product-img"
+                    onError={(e) => {
+                      e.target.src = '/placeholder.jpg';
+                    }}
+                  />
+                  {product.discountedPrice < product.originalPrice && (
+                    <div className="discount-badge">
+                      {Math.round(100 - (product.discountedPrice / product.originalPrice * 100))}% OFF
                     </div>
-                  </div>
-                  <button 
-                    className="add-to-cart-btn w-100 mt-2"
-                    onClick={() => handleAddToCart(product)}
-                  >
-                    <FaShoppingCart className="me-2" />
-                    Add to Cart
-                  </button>
+                  )}
                 </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+                <Card.Body className="d-flex flex-column">
+                  <Card.Title className="product-title">{product.name}</Card.Title>
+                  <Card.Text className="text-muted product-category">
+                    {product.category || 'Uncategorized'}
+                  </Card.Text>
+                  <div className="mt-auto">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <div className="price">
+                        {product.discountedPrice < product.originalPrice && (
+                          <span className="original-price text-muted text-decoration-line-through me-2">
+                            ${product.originalPrice}
+                          </span>
+                        )}
+                        <span className="current-price fw-bold">
+                          ${product.discountedPrice || product.price}
+                        </span>
+                      </div>
+                      <div className="rating">
+                        <FaStar className="text-warning" />
+                        <span className="ms-1">{product.rating || '4.5'}</span>
+                      </div>
+                    </div>
+                    <button 
+                      className="add-to-cart-btn w-100 mt-2"
+                      onClick={() => handleAddToCart(product)}
+                    >
+                      <FaShoppingCart className="me-2" />
+                      Add to Cart
+                    </button>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      )}
     </Container>
   );
 }
