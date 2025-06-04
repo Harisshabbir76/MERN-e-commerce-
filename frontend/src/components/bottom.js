@@ -15,9 +15,11 @@ export default function BottomProducts() {
     const fetchProducts = async () => {
       try {
         const res = await axios.get('sublime-magic-production.up.railway.app/catalog');
-        const filtered = res.data.filter(product => 
-          product.category.toLowerCase() === 'bottom'
-        );
+       const products = Array.isArray(res.data) ? res.data : res.data.products || [];
+
+      const filtered = products.filter(product => 
+        product.category?.toLowerCase() === 'bottom'
+      );
         if (filtered.length === 0) {
           throw new Error('No bottoms found in our collection');
         }

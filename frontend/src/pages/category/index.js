@@ -33,20 +33,127 @@ export default function Category() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await axios.get('sublime-magic-production.up.railway.app/categories');
-        setCategories(res.data);
+        const res = await axios.get('https://sublime-magic-production.up.railway.app/categories');
+        
+        // Check if response exists and has data
+        if (!res || !res.data) {
+          throw new Error('No data received from server');
+        }
+
+        // Ensure the response data is an array
+        if (!Array.isArray(res.data)) {
+          // If data is an object, try to extract array from common properties
+          const possibleArray = res.data.categories || res.data.items || res.data.data;
+          if (Array.isArray(possibleArray)) {
+            setCategories(possibleArray);
+          } else {
+            throw new Error('Invalid data format: Expected array');
+          }
+        } else {
+          setCategories(res.data);
+        }
       } catch (err) {
-        setError(err);
+        setError(err.message || 'Failed to load categories. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
+    
     fetchCategories();
   }, []);
 
   const getCategoryImage = (category) => {
+    if (!category) return 'https://via.placeholder.com/300';
+    
     const normalizedCategory = category.toLowerCase().replace(/\s+/g, '-');
-    return categoryImages[normalizedCategory] || categoryImages[category.toLowerCase()] || 'https://via.placeholder.com/300';
+    return categoryImages[normalizedCategory] || 
+           categoryImages[category.toLowerCase()] || 
+           'https://via.placeholder.com/300';
+  };
+
+  const renderCategoryCards = () => {
+    if (!Array.isArray(categories) return null;
+    
+    return categories.map((category, index) => {
+      if (!category) return null;
+      
+      return (
+        <Col key={index} xs={12} sm={6} md={4} lg={3}>
+          <Card 
+            className="h-100 border-0 shadow-sm"
+            onClick={() => navigate(`/category/${category.toString().replace(/\s+/g, '-')}`)}
+            style={{
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              borderRadius: '12px',
+              overflow: 'hidden',
+            }}
+          >
+            <div 
+              style={{
+                height: '200px',
+                overflow: 'hidden',
+                position: 'relative'
+              }}
+            >
+              <Card.Img 
+                variant="top" 
+                src={getCategoryImage(category)} 
+                alt={category.toString()}
+                style={{
+                  objectFit: 'cover',
+                  height: '100%',
+                  width: '100%',
+                  transition: 'transform 0.3s ease',
+                }}
+                onError={(e) => {
+                  e.target.src = 'https://via.placeholder.com/300';
+                }}
+              />
+              <div 
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: 'linear-gradient(to bottom, rgba(102,126,234,0.2) 0%, rgba(118,75,162,0.4) 100%)'
+                }}
+              />
+            </div>
+            <Card.Body className="text-center p-3">
+              <Card.Title 
+                className="m-0 fw-semibold"
+                style={{
+                  color: '#2d3748',
+                  fontSize: '1.1rem',
+                  textTransform: 'capitalize'
+                }}
+              >
+                {typeof category === 'string' 
+                  ? category.split(' ').map(word => 
+                      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                    ).join(' ')
+                  : category}
+              </Card.Title>
+              <Button 
+                variant="outline-primary"
+                size="sm"
+                className="mt-2"
+                style={{
+                  borderRadius: '20px',
+                  padding: '0.25rem 1rem',
+                  borderWidth: '1.5px',
+                  backgroundColor: 'rgba(102,126,234,0.05)'
+                }}
+              >
+                Shop Now
+              </Button>
+            </Card.Body>
+          </Card>
+        </Col>
+      );
+    });
   };
 
   return (
@@ -73,93 +180,28 @@ export default function Category() {
 
       {error && (
         <Alert variant="danger" className="text-center">
-          Error loading categories: {error.message}
+          {error}
+          <div className="mt-2">
+            <Button variant="outline-danger" size="sm" onClick={() => window.location.reload()}>
+              Retry
+            </Button>
+          </div>
         </Alert>
       )}
 
-      <Row className="g-4">
-        {categories.map((category, index) => (
-          <Col key={index} xs={12} sm={6} md={4} lg={3}>
-            <Card 
-              className="h-100 border-0 shadow-sm"
-              onClick={() => navigate(`/category/${category.replace(/\s+/g, '-')}`)}
-              style={{
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                borderRadius: '12px',
-                overflow: 'hidden',
-                ':hover': {
-                  transform: 'translateY(-5px)',
-                  boxShadow: '0 10px 20px rgba(102,126,234,0.15)'
-                }
-              }}
-            >
-              <div 
-                style={{
-                  height: '200px',
-                  overflow: 'hidden',
-                  position: 'relative'
-                }}
-              >
-                <Card.Img 
-                  variant="top" 
-                  src={getCategoryImage(category)} 
-                  alt={category}
-                  style={{
-                    objectFit: 'cover',
-                    height: '100%',
-                    width: '100%',
-                    transition: 'transform 0.3s ease',
-                    ':hover': {
-                      transform: 'scale(1.05)'
-                    }
-                  }}
-                  onError={(e) => {
-                    e.target.src = 'https://via.placeholder.com/300';
-                  }}
-                />
-                <div 
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: 'linear-gradient(to bottom, rgba(102,126,234,0.2) 0%, rgba(118,75,162,0.4) 100%)'
-                  }}
-                />
-              </div>
-              <Card.Body className="text-center p-3">
-                <Card.Title 
-                  className="m-0 fw-semibold"
-                  style={{
-                    color: '#2d3748',
-                    fontSize: '1.1rem',
-                    textTransform: 'capitalize'
-                  }}
-                >
-                  {category.split(' ').map(word => 
-                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-                  ).join(' ')}
-                </Card.Title>
-                <Button 
-                  variant="outline-primary"
-                  size="sm"
-                  className="mt-2"
-                  style={{
-                    borderRadius: '20px',
-                    padding: '0.25rem 1rem',
-                    borderWidth: '1.5px',
-                    backgroundColor: 'rgba(102,126,234,0.05)'
-                  }}
-                >
-                  Shop Now
-                </Button>
-              </Card.Body>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+      {!loading && !error && (
+        <>
+          {categories.length === 0 ? (
+            <Alert variant="info" className="text-center">
+              No categories found.
+            </Alert>
+          ) : (
+            <Row className="g-4">
+              {renderCategoryCards()}
+            </Row>
+          )}
+        </>
+      )}
     </Container>
   );
 }

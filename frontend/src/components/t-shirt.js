@@ -15,9 +15,11 @@ export default function TshirtProducts() {
     const fetchProducts = async () => {
       try {
         const res = await axios.get('sublime-magic-production.up.railway.app/catalog');
-        const filtered = res.data.filter(product => 
-          product.category.toLowerCase() === 't-shirt'
+        const products = Array.isArray(res.data) ? res.data : res.data.products || [];
+        const filtered = products.filter(product =>
+          product.category?.toLowerCase() === 't-shirt'
         );
+
         if (filtered.length === 0) {
           throw new Error('No t-shirts found in our collection');
         }
@@ -67,7 +69,7 @@ export default function TshirtProducts() {
               <div className="product-image-container">
                 <Card.Img
                   variant="top"
-                  src={`http://localhost:5000${product.image?.[0] || '/placeholder.jpg'}`}
+                  src={`sublime-magic-production.up.railway.app${product.image?.[0] || '/placeholder.jpg'}`}
                   alt={product.name}
                   className="product-img"
                 />
