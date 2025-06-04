@@ -64,7 +64,7 @@ export default function Category() {
 
       {!loading && !error && (
         <Row xs={1} sm={2} md={3} lg={5} className="category-grid g-4">
-          {categories.slice(0, 4).map((category, index) => (
+          {Array.isArray(categories) && categories.slice(0, 4).map((category, index) => (
             <Col key={index} className="category-col">
               <Card 
                 className="category-card h-100"
