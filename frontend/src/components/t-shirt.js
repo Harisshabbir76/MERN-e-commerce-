@@ -15,20 +15,21 @@ export default function TshirtProducts() {
     const fetchProducts = async () => {
       try {
         const res = await axios.get('https://sublime-magic-production.up.railway.app/catalog');
-        
-        // Safely extract products array from response
+        console.log('🪲 RAW RESPONSE:', res.data); // 🕵️ Log the raw response for debugging
+
+        // Determine structure
         let products = [];
         if (Array.isArray(res.data)) {
           products = res.data;
-        } else if (res.data?.products && Array.isArray(res.data.products)) {
+        } else if (Array.isArray(res.data?.products)) {
           products = res.data.products;
-        } else if (res.data?.items && Array.isArray(res.data.items)) {
+        } else if (Array.isArray(res.data?.items)) {
           products = res.data.items;
         } else {
           throw new Error('Invalid products data format');
         }
-        
-        // Filter for t-shirts
+
+        // Filter t-shirts only
         const filtered = products.filter(product => 
           product.category?.toLowerCase() === 't-shirt'
         );
@@ -39,6 +40,7 @@ export default function TshirtProducts() {
           setTshirts(filtered);
         }
       } catch (err) {
+        console.error('🪳 Error fetching products:', err);
         setError(err.message || 'Failed to load products');
       } finally {
         setLoading(false);
@@ -49,11 +51,7 @@ export default function TshirtProducts() {
   }, []);
 
   const handleAddToCart = (product) => {
-    addToCart({
-      ...product,
-      quantity: 1
-    });
-    // Optional: Add toast notification here
+    addToCart({ ...product, quantity: 1 });
   };
 
   return (
@@ -62,7 +60,7 @@ export default function TshirtProducts() {
         <h1 className="page-header">T-Shirt Collection</h1>
         <div className="header-decoration"></div>
       </div>
-      
+
       {loading ? (
         <div className="text-center my-5 py-5">
           <Spinner animation="border" variant="primary" />
