@@ -15,24 +15,18 @@ export default function TshirtProducts() {
     const fetchProducts = async () => {
   try {
     const res = await axios.get('https://sublime-magic-production.up.railway.app/catalog');
-    
-    console.log('Full API response:', res);
-    console.log('Response data:', res.data);
+    const data = res.data;
 
-    // Safely extract products array
-    let products = [];
-    if (Array.isArray(res.data)) {
-      products = res.data;
-    } else if (res.data && Array.isArray(res.data.data)) {
-      products = res.data.data;
-    } else {
-      throw new Error('Invalid data format from server');
-    }
+    const products = Array.isArray(data)
+      ? data
+      : Array.isArray(data.data)
+      ? data.data
+      : [];
 
-    console.log('Products array:', products);
+    if (!Array.isArray(products)) throw new Error('Expected array, got invalid data');
 
-    const filtered = products.filter(product => 
-      product?.category?.toLowerCase()?.includes('t-shirt')
+    const filtered = products.filter(p =>
+      p?.category?.toLowerCase()?.includes('t-shirt')
     );
 
     setTshirts(filtered);
@@ -45,6 +39,7 @@ export default function TshirtProducts() {
     setLoading(false);
   }
 };
+
 
     fetchProducts();
   }, []);
