@@ -54,8 +54,7 @@ app.use(cors());
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://harrishere:Haris123@tododb.qyf9c.mongodb.net/clothingweb?retryWrites=true&w=majority&appName=Tododb';
 
 mongoose.connect(MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+    
 })
     .then(() => console.log('Connected to MongoDB'))
     .catch((err) => console.error('Failed to connect to MongoDB', err));
@@ -146,10 +145,21 @@ app.post('/dashboard/add-product', upload.array('images', 10), async (req, res) 
 
 
 
-app.get('/catalog',async(req,res)=>{
-  const products=await Product.find()
-  res.json(products)
-})
+app.get('/catalog', async (req, res) => {
+  try {
+    const products = await Product.find();
+    
+    if (!Array.isArray(products)) {
+      return res.status(500).json({ error: 'Unexpected data format' });
+    }
+
+    res.status(200).json(products); // ✅ always an array
+  } catch (err) {
+    console.error('💥 Error in /catalog:', err);
+    res.status(500).json({ error: 'Failed to fetch products' }); // ❌ object — frontend handles this
+  }
+});
+
 
 
 app.get('/categories', async (req, res) => {
