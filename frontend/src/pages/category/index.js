@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Container, 
-  Row, 
-  Col, 
-  Card, 
-  Spinner, 
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Spinner,
   Alert,
   Button,
   Stack
@@ -34,23 +34,21 @@ export default function Category() {
     const fetchCategories = async () => {
       try {
         const res = await axios.get('https://sublime-magic-production.up.railway.app/categories');
-        
-        // Check if response exists and has data
+
         if (!res || !res.data) {
           throw new Error('No data received from server');
         }
 
-        // Ensure the response data is an array
-        if (!Array.isArray(res.data)) {
-          // If data is an object, try to extract array from common properties
-          const possibleArray = res.data.categories || res.data.items || res.data.data;
-          if (Array.isArray(possibleArray)) {
-            setCategories(possibleArray);
-          } else {
-            throw new Error('Invalid data format: Expected array');
-          }
-        } else {
+        if (Array.isArray(res.data)) {
           setCategories(res.data);
+        } else if (Array.isArray(res.data.categories)) {
+          setCategories(res.data.categories);
+        } else if (Array.isArray(res.data.data)) {
+          setCategories(res.data.data);
+        } else if (Array.isArray(res.data.items)) {
+          setCategories(res.data.items);
+        } else {
+          throw new Error('Invalid data format: Expected array');
         }
       } catch (err) {
         setError(err.message || 'Failed to load categories. Please try again later.');
@@ -58,30 +56,34 @@ export default function Category() {
         setLoading(false);
       }
     };
-    
+
     fetchCategories();
   }, []);
 
   const getCategoryImage = (category) => {
     if (!category) return 'https://via.placeholder.com/300';
-    
+
     const normalizedCategory = category.toLowerCase().replace(/\s+/g, '-');
-    return categoryImages[normalizedCategory] || 
-           categoryImages[category.toLowerCase()] || 
-           'https://via.placeholder.com/300';
+    return (
+      categoryImages[normalizedCategory] ||
+      categoryImages[category.toLowerCase()] ||
+      'https://via.placeholder.com/300'
+    );
   };
 
   const renderCategoryCards = () => {
-    if (!Array.isArray(categories) return null;
-    
+    if (!Array.isArray(categories)) return null;
+
     return categories.map((category, index) => {
       if (!category) return null;
-      
+
       return (
         <Col key={index} xs={12} sm={6} md={4} lg={3}>
-          <Card 
+          <Card
             className="h-100 border-0 shadow-sm"
-            onClick={() => navigate(`/category/${category.toString().replace(/\s+/g, '-')}`)}
+            onClick={() =>
+              navigate(`/category/${category.toString().replace(/\s+/g, '-')}`)
+            }
             style={{
               cursor: 'pointer',
               transition: 'all 0.3s ease',
@@ -89,16 +91,16 @@ export default function Category() {
               overflow: 'hidden',
             }}
           >
-            <div 
+            <div
               style={{
                 height: '200px',
                 overflow: 'hidden',
-                position: 'relative'
+                position: 'relative',
               }}
             >
-              <Card.Img 
-                variant="top" 
-                src={getCategoryImage(category)} 
+              <Card.Img
+                variant="top"
+                src={getCategoryImage(category)}
                 alt={category.toString()}
                 style={{
                   objectFit: 'cover',
@@ -110,33 +112,39 @@ export default function Category() {
                   e.target.src = 'https://via.placeholder.com/300';
                 }}
               />
-              <div 
+              <div
                 style={{
                   position: 'absolute',
                   top: 0,
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  background: 'linear-gradient(to bottom, rgba(102,126,234,0.2) 0%, rgba(118,75,162,0.4) 100%)'
+                  background:
+                    'linear-gradient(to bottom, rgba(102,126,234,0.2) 0%, rgba(118,75,162,0.4) 100%)',
                 }}
               />
             </div>
             <Card.Body className="text-center p-3">
-              <Card.Title 
+              <Card.Title
                 className="m-0 fw-semibold"
                 style={{
                   color: '#2d3748',
                   fontSize: '1.1rem',
-                  textTransform: 'capitalize'
+                  textTransform: 'capitalize',
                 }}
               >
-                {typeof category === 'string' 
-                  ? category.split(' ').map(word => 
-                      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-                    ).join(' ')
+                {typeof category === 'string'
+                  ? category
+                      .split(' ')
+                      .map(
+                        (word) =>
+                          word.charAt(0).toUpperCase() +
+                          word.slice(1).toLowerCase()
+                      )
+                      .join(' ')
                   : category}
               </Card.Title>
-              <Button 
+              <Button
                 variant="outline-primary"
                 size="sm"
                 className="mt-2"
@@ -144,7 +152,7 @@ export default function Category() {
                   borderRadius: '20px',
                   padding: '0.25rem 1rem',
                   borderWidth: '1.5px',
-                  backgroundColor: 'rgba(102,126,234,0.05)'
+                  backgroundColor: 'rgba(102,126,234,0.05)',
                 }}
               >
                 Shop Now
@@ -158,22 +166,29 @@ export default function Category() {
 
   return (
     <Container className="py-5" style={{ minHeight: '80vh' }}>
-      {/* Hero Section */}
       <Stack gap={3} className="text-center mb-5">
-        <h1 className="display-4 fw-bold" style={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          display: 'inline-block'
-        }}>
+        <h1
+          className="display-4 fw-bold"
+          style={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            display: 'inline-block',
+          }}
+        >
           Shop by Category
         </h1>
         <p className="text-muted fs-5">Discover our premium collections</p>
       </Stack>
-      
+
       {loading && (
         <Stack gap={2} className="text-center my-5 py-5">
-          <Spinner animation="border" variant="primary" className="mx-auto" style={{ width: '3rem', height: '3rem' }} />
+          <Spinner
+            animation="border"
+            variant="primary"
+            className="mx-auto"
+            style={{ width: '3rem', height: '3rem' }}
+          />
           <p className="text-muted">Loading our collections...</p>
         </Stack>
       )}
@@ -182,7 +197,11 @@ export default function Category() {
         <Alert variant="danger" className="text-center">
           {error}
           <div className="mt-2">
-            <Button variant="outline-danger" size="sm" onClick={() => window.location.reload()}>
+            <Button
+              variant="outline-danger"
+              size="sm"
+              onClick={() => window.location.reload()}
+            >
               Retry
             </Button>
           </div>
@@ -196,9 +215,7 @@ export default function Category() {
               No categories found.
             </Alert>
           ) : (
-            <Row className="g-4">
-              {renderCategoryCards()}
-            </Row>
+            <Row className="g-4">{renderCategoryCards()}</Row>
           )}
         </>
       )}
