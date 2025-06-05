@@ -17,19 +17,34 @@ export default function BottomProducts() {
     const fetchProducts = async () => {
       try {
         const res = await axios.get('https://sublime-magic-production.up.railway.app/catalog');
-        const products = Array.isArray(res.data) ? res.data : res.data.products || [];
+        const data = res.data;
+
+        let products = [];
+
+        if (Array.isArray(data)) {
+          products = data;
+        } else if (data && Array.isArray(data.data)) {
+          products = data.data;
+        } else if (data && Array.isArray(data.products)) {
+          products = data.products;
+        } else {
+          throw new Error('Unexpected API response: expected an array of products');
+        }
 
         const filtered = products.filter(product =>
-          product.category?.toLowerCase().includes('bottom')
+          product.category?.toLowerCase() === 'bottom'
         );
 
         if (filtered.length === 0) {
-          throw new Error('No bottoms found in our collection');
+          setError('No bottoms found in our collection');
+        } else {
+          setBottoms(filtered);
+          setError(null);
         }
-
-        setBottoms(filtered);
       } catch (err) {
+        console.error('Fetch error:', err);
         setError(err.message || 'Failed to fetch products.');
+        setBottoms([]);
       } finally {
         setLoading(false);
       }
@@ -60,67 +75,65 @@ export default function BottomProducts() {
         <div className="bottom-header-decoration"></div>
       </div>
 
-      {loading && (
+      {loading ? (
         <div className="bottom-loading-container">
           <Spinner animation="border" variant="primary" className="bottom-spinner" />
           <p className="bottom-loading-text">Loading bottoms...</p>
         </div>
-      )}
-
-      {error && (
+      ) : error ? (
         <Alert variant="info" className="bottom-error-alert">
           {error}
         </Alert>
-      )}
-
-      <Row xs={1} sm={2} md={3} lg={4} className="bottom-grid g-4">
-        {bottoms.map(product => (
-          <Col key={product._id} className="bottom-col">
-            <Card className="bottom-card h-100">
-              <div className="bottom-img-container">
-                <Card.Img
-                  variant="top"
-                  onClick={() => navigate(`/product/${product.slug}`)}
-                  src={getImageUrl(product.image?.[0])}
-                  alt={product.name}
-                  className="bottom-img"
-                  onError={(e) => {
-                    e.target.src = '/placeholder.jpg';
-                  }}
-                />
-                {product.discountedPrice < product.originalPrice && (
-                  <div className="bottom-discount-badge">
-                    {Math.round(100 - (product.discountedPrice / product.originalPrice * 100))}% OFF
-                  </div>
-                )}
-              </div>
-              <Card.Body className="bottom-card-body">
-                <Card.Title className="bottom-name">{product.name}</Card.Title>
-                <Card.Text className="bottom-category">{product.category}</Card.Text>
-                <div className="bottom-card-footer">
-                  <div className="bottom-price-container">
-                    {product.discountedPrice < product.originalPrice && (
-                      <span className="bottom-original-price">Rs {product.originalPrice}</span>
-                    )}
-                    <span className="bottom-current-price">Rs {product.discountedPrice}</span>
-                  </div>
-                  <div className="bottom-rating">
-                    <FaStar className="bottom-rating-icon" />
-                    <span className="bottom-rating-value">{product.rating || '4.5'}</span>
-                  </div>
-                  <button
-                    className="bottom-add-to-cart-btn"
-                    onClick={() => handleAddToCart(product)}
-                  >
-                    <FaShoppingCart className="bottom-cart-icon" />
-                    Add to Cart
-                  </button>
+      ) : (
+        <Row xs={1} sm={2} md={3} lg={4} className="bottom-grid g-4">
+          {bottoms.map(product => (
+            <Col key={product._id} className="bottom-col">
+              <Card className="bottom-card h-100">
+                <div className="bottom-img-container">
+                  <Card.Img
+                    variant="top"
+                    onClick={() => navigate(`/product/${product.slug}`)}
+                    src={getImageUrl(product.image?.[0])}
+                    alt={product.name}
+                    className="bottom-img"
+                    onError={(e) => {
+                      e.target.src = '/placeholder.jpg';
+                    }}
+                  />
+                  {product.discountedPrice < product.originalPrice && (
+                    <div className="bottom-discount-badge">
+                      {Math.round(100 - (product.discountedPrice / product.originalPrice * 100))}% OFF
+                    </div>
+                  )}
                 </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+                <Card.Body className="bottom-card-body">
+                  <Card.Title className="bottom-name">{product.name}</Card.Title>
+                  <Card.Text className="bottom-category">{product.category}</Card.Text>
+                  <div className="bottom-card-footer">
+                    <div className="bottom-price-container">
+                      {product.discountedPrice < product.originalPrice && (
+                        <span className="bottom-original-price">Rs {product.originalPrice}</span>
+                      )}
+                      <span className="bottom-current-price">Rs {product.discountedPrice}</span>
+                    </div>
+                    <div className="bottom-rating">
+                      <FaStar className="bottom-rating-icon" />
+                      <span className="bottom-rating-value">{product.rating || '4.5'}</span>
+                    </div>
+                    <button
+                      className="bottom-add-to-cart-btn"
+                      onClick={() => handleAddToCart(product)}
+                    >
+                      <FaShoppingCart className="bottom-cart-icon" />
+                      Add to Cart
+                    </button>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      )}
     </Container>
   );
 }
