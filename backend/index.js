@@ -22,12 +22,11 @@ const PORT = process.env.PORT || 5000;
 //midlleware
 const corsOptions = {
   origin: [
-    'https://mern-e-commerce-brown.vercel.app/',
-    'http://localhost:3000' // for local development
+    'https://mern-e-commerce-brown.vercel.app',
+    'http://localhost:3000'
   ],
-  optionsSuccessStatus: 200
+  credentials: true
 };
-
 app.use(cors(corsOptions));
 
 
@@ -158,15 +157,19 @@ app.post('/dashboard/add-product', upload.array('images', 10), async (req, res) 
 
 app.get('/catalog', async (req, res) => {
   try {
+    console.log('Fetching products from database...');
     const products = await Product.find();
+    console.log('Products found:', products); // Log what's actually returned
     
-    // Ensure we always return an array, even if empty
-    const productArray = Array.isArray(products) ? products : [];
-    
-    res.status(200).json(productArray);
+    if (!Array.isArray(products)) {
+      console.error('Products is not an array:', typeof products);
+      return res.status(500).json({ error: 'Unexpected data format', data: [] });
+    }
+
+    res.status(200).json(products);
   } catch (err) {
     console.error('Error in /catalog:', err);
-    res.status(500).json([]); // Return empty array on error
+    res.status(500).json({ error: 'Failed to fetch products', data: [] });
   }
 });
 

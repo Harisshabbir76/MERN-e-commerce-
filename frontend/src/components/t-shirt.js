@@ -15,24 +15,32 @@ export default function TshirtProducts() {
     const fetchProducts = async () => {
   try {
     const res = await axios.get('https://sublime-magic-production.up.railway.app/catalog');
+    
+    console.log('Full API response:', res);
+    console.log('Response data:', res.data);
 
-    // Ensure we have data and it's an array
-    if (!res.data || !Array.isArray(res.data)) {
+    // Safely extract products array
+    let products = [];
+    if (Array.isArray(res.data)) {
+      products = res.data;
+    } else if (res.data && Array.isArray(res.data.data)) {
+      products = res.data.data;
+    } else {
       throw new Error('Invalid data format from server');
     }
 
-    // Filter for t-shirts (case insensitive)
-    const filtered = res.data.filter(product => 
+    console.log('Products array:', products);
+
+    const filtered = products.filter(product => 
       product?.category?.toLowerCase()?.includes('t-shirt')
     );
 
     setTshirts(filtered);
     setError(filtered.length === 0 ? 'No t-shirts found' : null);
-    
   } catch (err) {
-    console.error('Error:', err);
+    console.error('Fetch error:', err);
     setError(err.message || 'Failed to load products');
-    setTshirts([]); // Set empty array on error
+    setTshirts([]);
   } finally {
     setLoading(false);
   }
