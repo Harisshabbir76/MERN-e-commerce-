@@ -27,7 +27,7 @@ export default function Category() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await axios.get('sublime-magic-production.up.railway.app/categories');
+        const res = await axios.get('https://sublime-magic-production.up.railway.app/catalog/categories');
         setCategories(res.data);
       } catch (err) {
         setError(err);
@@ -68,7 +68,8 @@ export default function Category() {
             <Col key={index} className="category-col">
               <Card 
                 className="category-card h-100"
-                onClick={() => navigate(`/category/${category}`)}
+                onClick={() =>
+                navigate(`/category/${category.toString().replace(/\s+/g, '-')}`)}
                 role="button"
               >
                 <div className="category-img-container">

@@ -14,7 +14,7 @@ export default function BottomProducts() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get('sublime-magic-production.up.railway.app/catalog');
+        const res = await axios.get('https://sublime-magic-production.up.railway.app/catalog/catalog');
        const products = Array.isArray(res.data) ? res.data : res.data.products || [];
 
       const filtered = products.filter(product => 
@@ -69,6 +69,7 @@ export default function BottomProducts() {
               <div className="bottom-img-container">
                 <Card.Img
                   variant="top"
+                  onClick={() => navigate(`/product/${product.slug}`)}
                   src={`sublime-magic-production.up.railway.app${product.image?.[0] || '/placeholder.jpg'}`}
                   alt={product.name}
                   className="bottom-img"

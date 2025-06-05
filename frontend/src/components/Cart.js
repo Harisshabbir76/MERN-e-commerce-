@@ -44,7 +44,7 @@ export default function Cart() {
               <td>
                 <div className="d-flex align-items-center">
                   <img
-                    src={`sublime-magic-production.up.railway.app${item.image[0]}`}
+                    src={`https://sublime-magic-production.up.railway.app${item.image[0]}`}
                     alt={item.name}
                     style={{ width: '50px', height: '50px', marginRight: '10px' }}
                   />

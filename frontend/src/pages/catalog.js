@@ -93,7 +93,7 @@ export default function Catalog() {
                 >
                   <Card.Img
                     variant="top"
-                    src={`http://localhost:5000${product.image?.[0] || '/placeholder.jpg'}`}
+                    src={`https://sublime-magic-production.up.railway.app${product.image?.[0] || '/placeholder.jpg'}`}
                     alt={product.name}
                     style={{ 
                       height: '200px', 
