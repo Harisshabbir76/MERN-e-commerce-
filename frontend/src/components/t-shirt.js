@@ -13,33 +13,39 @@ export default function TshirtProducts() {
 
   useEffect(() => {
     const fetchProducts = async () => {
-  try {
-    const res = await axios.get('https://sublime-magic-production.up.railway.app/catalog');
-    const data = res.data;
+      try {
+        const res = await axios.get('https://sublime-magic-production.up.railway.app/catalog');
+        const data = res.data;
 
-    const products = Array.isArray(data)
-      ? data
-      : Array.isArray(data.data)
-      ? data.data
-      : [];
+        // Debug log to inspect API response
+        console.log('API response:', data);
 
-    if (!Array.isArray(products)) throw new Error('Expected array, got invalid data');
+        let products = [];
 
-    const filtered = products.filter(p =>
-      p?.category?.toLowerCase()?.includes('t-shirt')
-    );
+        if (Array.isArray(data)) {
+          products = data;
+        } else if (data && Array.isArray(data.data)) {
+          products = data.data;
+        } else if (data && Array.isArray(data.products)) {
+          products = data.products;
+        } else {
+          throw new Error('Unexpected API response: expected an array of products');
+        }
 
-    setTshirts(filtered);
-    setError(filtered.length === 0 ? 'No t-shirts found' : null);
-  } catch (err) {
-    console.error('Fetch error:', err);
-    setError(err.message || 'Failed to load products');
-    setTshirts([]);
-  } finally {
-    setLoading(false);
-  }
-};
+        const filtered = products.filter(p =>
+          p?.category?.toLowerCase()?.includes('t-shirt')
+        );
 
+        setTshirts(filtered);
+        setError(filtered.length === 0 ? 'No t-shirts found' : null);
+      } catch (err) {
+        console.error('Fetch error:', err);
+        setError(err.message || 'Failed to load products');
+        setTshirts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
     fetchProducts();
   }, []);
