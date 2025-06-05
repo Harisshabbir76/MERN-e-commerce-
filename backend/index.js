@@ -1,6 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const User=require('./Models/User')
+const User = require('./Models/User');
 const jwt = require("jsonwebtoken");
 const cors = require('cors');
 require('dotenv').config();
@@ -10,16 +10,14 @@ const multer = require('multer');
 const path = require('path');
 const ContactUs = require('./Models/ContactUs');
 const Order = require('./Models/Order');
-const Review=require('./Models/Review');
+const Review = require('./Models/Review');
 const axios = require('axios');
 const nodemailer = require('nodemailer');
-
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-
-//midlleware
+// Middleware
 const corsOptions = {
   origin: [
     'https://mern-e-commerce-brown.vercel.app',
@@ -29,19 +27,28 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+// Memory monitoring
+setInterval(() => {
+  const used = process.memoryUsage().heapUsed / 1024 / 1024;
+  console.log(`Memory usage: ${Math.round(used * 100) / 100} MB`);
+}, 10000);
 
-
-
-const transporter = nodemailer.createTransport({
-    service: 'gmail', // or your email service
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
+// Request logging
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
 });
 
+// Email transporter
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
 
-
+// File uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const storage = multer.diskStorage({
@@ -57,17 +64,34 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Middleware
 app.use(express.json());
-app.use(cors());
+
 // MongoDB Connection
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://harrishere:Haris123@tododb.qyf9c.mongodb.net/clothingweb?retryWrites=true&w=majority&appName=Tododb';
 
 mongoose.connect(MONGO_URI, {
-    
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000
 })
-    .then(() => console.log('Connected to MongoDB'))
-    .catch((err) => console.error('Failed to connect to MongoDB', err));
+.then(() => console.log('Connected to MongoDB'))
+.catch((err) => {
+  console.error('MongoDB connection error:', err);
+  process.exit(1);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.warn('MongoDB disconnected!');
+});
+
+// Error handlers
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled Rejection:', err);
+});
 
 // Routes
 
@@ -495,14 +519,26 @@ app.post('/api/reviews', async (req, res) => {
 
 
 
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    dbState: mongoose.connection.readyState,
+    timestamp: new Date()
+  });
+});
 
 
+const server = app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
 
-
-
-
-
-
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received. Shutting down gracefully...');
+  server.close(() => {
+    console.log('Server closed');
+    mongoose.connection.close(false, () => {
+      console.log('MongoDB connection closed');
+      process.exit(0);
+    });
+  });
 });
