@@ -18,7 +18,7 @@ export default function BottomProducts() {
        const products = Array.isArray(res.data) ? res.data : res.data.products || [];
 
       const filtered = products.filter(product => 
-        product.category?.toLowerCase() === 'bottom'
+        product.category?.toLowerCase().includes('bottom')
       );
         if (filtered.length === 0) {
           throw new Error('No bottoms found in our collection');
