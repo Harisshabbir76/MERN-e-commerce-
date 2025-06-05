@@ -15,10 +15,12 @@ export default function TshirtProducts() {
     const fetchProducts = async () => {
       try {
         const res = await axios.get('https://sublime-magic-production.up.railway.app/catalog');
-        console.log('🪲 RAW RESPONSE:', res.data); // 🕵️ Log the raw response for debugging
 
-        // Determine structure
+        console.log('🐞 Full API response:', res);
+        console.log('📦 res.data:', res.data);
+
         let products = [];
+
         if (Array.isArray(res.data)) {
           products = res.data;
         } else if (Array.isArray(res.data?.products)) {
@@ -26,13 +28,14 @@ export default function TshirtProducts() {
         } else if (Array.isArray(res.data?.items)) {
           products = res.data.items;
         } else {
-          throw new Error('Invalid products data format');
+          throw new Error('Invalid products data format. Expected an array in "data", "data.products", or "data.items".');
         }
 
-        // Filter t-shirts only
-        const filtered = products.filter(product => 
-          product.category?.toLowerCase() === 't-shirt'
+        const filtered = products.filter(product =>
+          product?.category?.toLowerCase() === 't-shirt'
         );
+
+        console.log('👕 Filtered t-shirts:', filtered);
 
         if (filtered.length === 0) {
           setError('No t-shirts found in our collection');
@@ -40,7 +43,7 @@ export default function TshirtProducts() {
           setTshirts(filtered);
         }
       } catch (err) {
-        console.error('🪳 Error fetching products:', err);
+        console.error('🚨 Error fetching t-shirts:', err);
         setError(err.message || 'Failed to load products');
       } finally {
         setLoading(false);
@@ -51,7 +54,10 @@ export default function TshirtProducts() {
   }, []);
 
   const handleAddToCart = (product) => {
-    addToCart({ ...product, quantity: 1 });
+    addToCart({
+      ...product,
+      quantity: 1,
+    });
   };
 
   return (
@@ -67,7 +73,7 @@ export default function TshirtProducts() {
           <p className="mt-3">Loading t-shirts...</p>
         </div>
       ) : error ? (
-        <Alert variant="info" className="text-center">
+        <Alert variant="danger" className="text-center">
           {error}
         </Alert>
       ) : (
@@ -79,7 +85,7 @@ export default function TshirtProducts() {
                   <Card.Img
                     variant="top"
                     src={
-                      product.image?.[0] 
+                      product.image?.[0]
                         ? `https://sublime-magic-production.up.railway.app${product.image[0]}`
                         : '/placeholder.jpg'
                     }
@@ -91,7 +97,7 @@ export default function TshirtProducts() {
                   />
                   {product.discountedPrice < product.originalPrice && (
                     <div className="discount-badge">
-                      {Math.round(100 - (product.discountedPrice / product.originalPrice * 100))}% OFF
+                      {Math.round(100 - (product.discountedPrice / product.originalPrice) * 100)}% OFF
                     </div>
                   )}
                 </div>
@@ -117,7 +123,7 @@ export default function TshirtProducts() {
                         <span className="ms-1">{product.rating || '4.5'}</span>
                       </div>
                     </div>
-                    <button 
+                    <button
                       className="add-to-cart-btn w-100 mt-2"
                       onClick={() => handleAddToCart(product)}
                     >
