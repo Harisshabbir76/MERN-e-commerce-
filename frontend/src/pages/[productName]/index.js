@@ -95,13 +95,13 @@ export default function ProductDetails() {
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/reviews', {
+      await axios.post('https://sublime-magic-production.up.railway.app/api/reviews', {
         product: product._id,
         ...reviewForm
       });
 
       // Refresh product and reviews
-      const res = await axios.get(`http://localhost:5000/product/${slug}`);
+      const res = await axios.get(`https://sublime-magic-production.up.railway.app/product/${slug}`);
       setProduct(res.data);
       setReviews(res.data.reviews);
       
@@ -153,7 +153,7 @@ export default function ProductDetails() {
         <Col md={6}>
           <Row xs={2} md={3} className="g-3">
             {product.image.map((img, index) => {
-              const imgUrl = img.startsWith('http') ? img : `http://localhost:5000${img}`;
+              const imgUrl = img.startsWith('http') ? img : `https://sublime-magic-production.up.railway.app${img}`;
               return (
                 <Col key={index}>
                   <Card
@@ -175,7 +175,7 @@ export default function ProductDetails() {
 
           <Card className="mt-4 border-0 shadow-sm">
             <Card.Img
-              src={product.image[selectedImage].startsWith('http') ? product.image[selectedImage] : `http://localhost:5000${product.image[selectedImage]}`}
+              src={product.image[selectedImage].startsWith('http') ? product.image[selectedImage] : `https://sublime-magic-production.up.railway.app${product.image[selectedImage]}`}
               alt={`${product.name} main image`}
               style={{
                 objectFit: 'contain',

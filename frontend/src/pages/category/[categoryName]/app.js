@@ -124,7 +124,7 @@ export default function CategoryProducts() {
                     product.image && product.image.length > 0
                       ? product.image[0].startsWith('http')
                         ? product.image[0]
-                        : `http://localhost:5000${product.image[0]}`
+                        : `https://sublime-magic-production.up.railway.app${product.image[0]}`
                       : 'https://via.placeholder.com/300'
                   }
                   alt={product.name}
