@@ -24,7 +24,7 @@ export default function Signup() {
     setError(null);
 
     try {
-      const res = await axios.post('sublime-magic-production.up.railway.app/signup', {
+      const res = await axios.post('https://sublime-magic-production.up.railway.app/signup', {
         name,
         email,
         password,

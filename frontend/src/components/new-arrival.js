@@ -25,7 +25,7 @@ const NewArrivals = () => {
   useEffect(() => {
     const fetchNewArrivals = async () => {
       try {
-        const response = await axios.get('sublime-magic-production.up.railway.app/new-arrival');
+        const response = await axios.get('https://sublime-magic-production.up.railway.app/new-arrival');
         setProducts(response.data.map(product => ({
           ...product,
           // Use actual stock value if provided, otherwise default to random stock (5-20)
@@ -103,7 +103,7 @@ const NewArrivals = () => {
                 >
                   <Card.Img
                     variant="top"
-                    src={`sublime-magic-production.up.railway.app${product.image?.[0] || '/placeholder.jpg'}`}
+                    src={`https://sublime-magic-production.up.railway.app${product.image?.[0] || '/placeholder.jpg'}`}
                     alt={product.name}
                     style={{ height: '200px', objectFit: 'cover' }}
                     className="p-3"

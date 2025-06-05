@@ -122,7 +122,7 @@ const ContactUs = () => {
     setIsSubmitting(true);
     
     try {
-      const response = await axios.post("sublime-magic-production.up.railway.app/contactUs", formData);
+      const response = await axios.post("https://sublime-magic-production.up.railway.app/contactUs", formData);
       showSuccessPopup(response.data.message || "Thank you for your message!");
       setFormData({ name: "", email: "", subject: "", message: "" });
     } catch (error) {

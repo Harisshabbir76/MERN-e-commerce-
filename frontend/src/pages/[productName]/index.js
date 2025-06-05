@@ -39,7 +39,7 @@ export default function ProductDetails() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await axios.get(`sublime-magic-production.up.railway.app/product/${slug}`);
+        const res = await axios.get(`https://sublime-magic-production.up.railway.app/product/${slug}`);
         setProduct(res.data);
         setReviews(res.data.reviews || []);
       } catch (err) {

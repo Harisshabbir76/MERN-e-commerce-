@@ -26,7 +26,7 @@ export default function Catalog() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get('sublime-magic-production.up.railway.app/catalog');
+        const res = await axios.get('https://sublime-magic-production.up.railway.app/catalog');
         setProducts(res.data.map(product => ({
           ...product,
           // Use actual stock value if provided, otherwise default to random stock (5-20)

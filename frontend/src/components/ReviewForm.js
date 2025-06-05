@@ -16,7 +16,7 @@ const ReviewForm = ({ productId, onReviewSubmit }) => {
     
     try {
       await axios.post(
-        'sublime-magic-production.up.railway.app/api/reviews',
+        'https://sublime-magic-production.up.railway.app/api/reviews',
         { 
           product: productId, 
           userName,

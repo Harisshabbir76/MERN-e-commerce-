@@ -19,7 +19,7 @@ export default function Dashboard() {
                 }
 
                 // Verify token and get user data
-                const response = await axios.get('sublime-magic-production.up.railway.app/auth/me', {
+                const response = await axios.get('https://sublime-magic-production.up.railway.app/auth/me', {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }

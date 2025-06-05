@@ -47,7 +47,7 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.get('sublime-magic-production.up.railway.app/logout');
+      await axios.get('https://sublime-magic-production.up.railway.app/logout');
       localStorage.removeItem('token');
       localStorage.removeItem('userEmail');
       setIsLoggedIn(false);

@@ -28,7 +28,7 @@ const SearchResults = () => {
     const fetchResults = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`sublime-magic-production.up.railway.app/search?query=${query}`);
+        const response = await axios.get(`https://sublime-magic-production.up.railway.app/search?query=${query}`);
         setResults(response.data.map(product => ({
           ...product,
           stock: product.stock || Math.floor(Math.random() * 16) + 5
