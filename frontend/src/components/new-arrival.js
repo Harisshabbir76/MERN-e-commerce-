@@ -98,7 +98,7 @@ const NewArrivals = () => {
               <Card className="h-100 shadow-sm border-0 d-flex flex-column">
                 <div 
                   style={{ cursor: 'pointer' }}
-                  onClick={() => navigate(`/product/${product.slug}`)}
+                  onClick={() => navigate(`/catalog/${product.slug}`)}
                   className="flex-grow-1"
                 >
                   <Card.Img

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { 
   Container, 
@@ -106,100 +106,97 @@ export default function CategoryProducts() {
                 transition: 'all 0.3s ease',
                 borderRadius: '12px',
                 overflow: 'hidden',
-                ':hover': {
-                  transform: product.stock > 0 ? 'translateY(-5px)' : 'none',
-                  boxShadow: product.stock > 0 ? '0 10px 20px rgba(102,126,234,0.15)' : 'none'
-                },
+                cursor: product.stock > 0 ? 'pointer' : 'default',
                 opacity: product.stock > 0 ? 1 : 0.7
               }}
+              onClick={() => {
+                if(product.stock > 0) navigate(`/category/${categoryName}/${product.slug}`)
+              }}
             >
-              <div 
-                style={{ cursor: 'pointer' }}
-                onClick={() => navigate(`/category/${categoryName}/${product.slug}`)}
-                className="flex-grow-1"
-              >
+              <div style={{
+                height: '200px',
+                overflow: 'hidden',
+                position: 'relative'
+              }}>
+                <Card.Img 
+                  variant="top" 
+                  src={
+                    product.image && product.image.length > 0
+                      ? product.image[0].startsWith('http')
+                        ? product.image[0]
+                        : `http://localhost:5000${product.image[0]}`
+                      : 'https://via.placeholder.com/300'
+                  }
+                  alt={product.name}
+                  style={{
+                    objectFit: 'cover',
+                    height: '100%',
+                    width: '100%',
+                    transition: 'transform 0.3s ease'
+                  }}
+                  onError={(e) => {
+                    e.target.src = 'https://via.placeholder.com/300';
+                  }}
+                />
                 <div style={{
-                  height: '200px',
-                  overflow: 'hidden',
-                  position: 'relative'
-                }}>
-                  <Card.Img 
-                    variant="top" 
-                    src={`http://localhost:5000${product.image[0]}`}
-                    alt={product.name}
-                    style={{
-                      objectFit: 'cover',
-                      height: '100%',
-                      width: '100%',
-                      transition: 'transform 0.3s ease',
-                      ':hover': {
-                        transform: product.stock > 0 ? 'scale(1.05)' : 'none'
-                      }
-                    }}
-                    onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/300';
-                    }}
-                  />
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: product.stock > 0 
+                    ? 'linear-gradient(to bottom, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.2) 100%)'
+                    : 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.4) 100%)'
+                }} />
+                {product.stock <= 0 && (
                   <div style={{
                     position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: product.stock > 0 
-                      ? 'linear-gradient(to bottom, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.2) 100%)'
-                      : 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.4) 100%)'
-                  }} />
-                  {product.stock <= 0 && (
-                    <div style={{
-                      position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%)',
-                      backgroundColor: 'rgba(0,0,0,0.7)',
-                      color: 'white',
-                      padding: '5px 10px',
-                      borderRadius: '5px',
-                      fontWeight: 'bold'
-                    }}>
-                      OUT OF STOCK
-                    </div>
-                  )}
-                </div>
-                <Card.Body className="p-3">
-                  <Stack direction="horizontal" gap={2} className="mb-1">
-                    <Card.Title className="mb-0 flex-grow-1" style={{ color: product.stock > 0 ? '#2d3748' : '#6c757d' }}>
-                      {product.name}
-                    </Card.Title>
-                    <Badge 
-                      bg={product.stock > 0 ? "success" : "danger"} 
-                      className="align-self-start"
-                    >
-                      {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
-                    </Badge>
-                  </Stack>
-                  <Badge bg="secondary" className="mb-2 align-self-start">
-                    {product.category}
-                  </Badge>
-                  
-                  <div className="mt-auto">
-                    {product.discountedPrice < product.originalPrice && (
-                      <Stack direction="horizontal" gap={2} className="mb-1">
-                        <span className="text-decoration-line-through text-muted small">
-                          {product.originalPrice} PKR
-                        </span>
-                        <Badge bg="danger" pill className="small">
-                          {Math.round(100 - (product.discountedPrice / product.originalPrice * 100))}% OFF
-                        </Badge>
-                      </Stack>
-                    )}
-                    
-                    <h5 className="mb-0 text-primary">
-                      {product.discountedPrice} PKR
-                    </h5>
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    color: 'white',
+                    padding: '5px 10px',
+                    borderRadius: '5px',
+                    fontWeight: 'bold'
+                  }}>
+                    OUT OF STOCK
                   </div>
-                </Card.Body>
+                )}
               </div>
+              <Card.Body className="p-3 d-flex flex-column">
+                <Stack direction="horizontal" gap={2} className="mb-1">
+                  <Card.Title className="mb-0 flex-grow-1" style={{ color: product.stock > 0 ? '#2d3748' : '#6c757d' }}>
+                    {product.name}
+                  </Card.Title>
+                  <Badge 
+                    bg={product.stock > 0 ? "success" : "danger"} 
+                    className="align-self-start"
+                  >
+                    {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
+                  </Badge>
+                </Stack>
+                <Badge bg="secondary" className="mb-2 align-self-start">
+                  {product.category}
+                </Badge>
+                
+                <div className="mt-auto">
+                  {product.discountedPrice < product.originalPrice && (
+                    <Stack direction="horizontal" gap={2} className="mb-1">
+                      <span className="text-decoration-line-through text-muted small">
+                        {product.originalPrice} PKR
+                      </span>
+                      <Badge bg="danger" pill className="small">
+                        {Math.round(100 - (product.discountedPrice / product.originalPrice * 100))}% OFF
+                      </Badge>
+                    </Stack>
+                  )}
+                  
+                  <h5 className="mb-0 text-primary">
+                    {product.discountedPrice} PKR
+                  </h5>
+                </div>
+              </Card.Body>
               <Card.Footer className="bg-white border-0 pt-0 pb-3">
                 {product.stock > 0 ? (
                   <Button 

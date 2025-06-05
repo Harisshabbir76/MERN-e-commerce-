@@ -57,7 +57,6 @@ export default function ProductDetails() {
       ...product,
       quantity: quantity
     });
-    
   };
 
   const handleOrderNow = () => {
@@ -152,38 +151,40 @@ export default function ProductDetails() {
       <Row className="g-4">
         {/* Product Images */}
         <Col md={6}>
-          <Card className="border-0 shadow-sm">
+          <Row xs={2} md={3} className="g-3">
+            {product.image.map((img, index) => {
+              const imgUrl = img.startsWith('http') ? img : `http://localhost:5000${img}`;
+              return (
+                <Col key={index}>
+                  <Card
+                    className={`h-100 cursor-pointer border ${index === selectedImage ? 'border-primary' : 'border-light'}`}
+                    onClick={() => setSelectedImage(index)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <Card.Img
+                      src={imgUrl}
+                      alt={`${product.name} image ${index + 1}`}
+                      style={{ objectFit: 'cover', height: '150px', width: '100%' }}
+                      onError={e => { e.target.src = '/placeholder.jpg'; }}
+                    />
+                  </Card>
+                </Col>
+              );
+            })}
+          </Row>
+
+          <Card className="mt-4 border-0 shadow-sm">
             <Card.Img
-              variant="top"
-              src={`http://localhost:5000${product.image[selectedImage]}`}
-              alt={product.name}
+              src={product.image[selectedImage].startsWith('http') ? product.image[selectedImage] : `http://localhost:5000${product.image[selectedImage]}`}
+              alt={`${product.name} main image`}
               style={{
                 objectFit: 'contain',
                 height: '400px',
                 width: '100%',
                 backgroundColor: '#f8f9fa'
               }}
+              onError={e => { e.target.src = '/placeholder.jpg'; }}
             />
-            <Card.Body>
-              <div className="d-flex gap-2 mt-3">
-                {product.image.map((img, index) => (
-                  <img
-                    key={index}
-                    src={`http://localhost:5000${img}`}
-                    alt={`${product.name} thumbnail ${index}`}
-                    style={{
-                      width: '80px',
-                      height: '80px',
-                      objectFit: 'cover',
-                      cursor: 'pointer',
-                      border: index === selectedImage ? '2px solid #667eea' : '1px solid #dee2e6',
-                      borderRadius: '8px'
-                    }}
-                    onClick={() => setSelectedImage(index)}
-                  />
-                ))}
-              </div>
-            </Card.Body>
           </Card>
         </Col>
 
@@ -420,12 +421,7 @@ export default function ProductDetails() {
       {/* Recommended Products Section */}
       <Row className="mt-5">
         <Col>
-          {product && (
-            <RecommendedProducts 
-              currentProductId={product._id} 
-              category={product.category} 
-            />
-          )}
+          <RecommendedProducts />
         </Col>
       </Row>
     </Container>

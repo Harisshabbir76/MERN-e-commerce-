@@ -14,7 +14,7 @@ export default function BottomProducts() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get('https://sublime-magic-production.up.railway.app/catalog/catalog');
+        const res = await axios.get('https://sublime-magic-production.up.railway.app/catalog');
        const products = Array.isArray(res.data) ? res.data : res.data.products || [];
 
       const filtered = products.filter(product => 
