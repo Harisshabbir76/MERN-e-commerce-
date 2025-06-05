@@ -13,42 +13,30 @@ export default function TshirtProducts() {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      try {
-        const res = await axios.get('https://sublime-magic-production.up.railway.app/catalog');
+  try {
+    const res = await axios.get('https://sublime-magic-production.up.railway.app/catalog');
 
-        console.log('🐞 Full API response:', res);
-        console.log('📦 res.data:', res.data);
+    // Ensure we have data and it's an array
+    if (!res.data || !Array.isArray(res.data)) {
+      throw new Error('Invalid data format from server');
+    }
 
-        let products = [];
+    // Filter for t-shirts (case insensitive)
+    const filtered = res.data.filter(product => 
+      product?.category?.toLowerCase()?.includes('t-shirt')
+    );
 
-        if (Array.isArray(res.data)) {
-          products = res.data;
-        } else if (Array.isArray(res.data?.products)) {
-          products = res.data.products;
-        } else if (Array.isArray(res.data?.items)) {
-          products = res.data.items;
-        } else {
-          throw new Error('Invalid products data format. Expected an array in "data", "data.products", or "data.items".');
-        }
-
-        const filtered = products.filter(product =>
-          product?.category?.toLowerCase() === 't-shirt'
-        );
-
-        console.log('👕 Filtered t-shirts:', filtered);
-
-        if (filtered.length === 0) {
-          setError('No t-shirts found in our collection');
-        } else {
-          setTshirts(filtered);
-        }
-      } catch (err) {
-        console.error('🚨 Error fetching t-shirts:', err);
-        setError(err.message || 'Failed to load products');
-      } finally {
-        setLoading(false);
-      }
-    };
+    setTshirts(filtered);
+    setError(filtered.length === 0 ? 'No t-shirts found' : null);
+    
+  } catch (err) {
+    console.error('Error:', err);
+    setError(err.message || 'Failed to load products');
+    setTshirts([]); // Set empty array on error
+  } finally {
+    setLoading(false);
+  }
+};
 
     fetchProducts();
   }, []);
