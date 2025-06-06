@@ -5,11 +5,13 @@ import { FaStar, FaShoppingCart } from 'react-icons/fa';
 import { useCart } from '../components/CartContext';
 import './heroSlider.css';
 
+
 export default function TshirtProducts() {
   const [tshirts, setTshirts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { addToCart } = useCart();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProducts = async () => {
