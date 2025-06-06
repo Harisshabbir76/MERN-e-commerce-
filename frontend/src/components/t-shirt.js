@@ -4,7 +4,7 @@ import { Container, Row, Col, Card, Spinner, Alert } from 'react-bootstrap';
 import { FaStar, FaShoppingCart } from 'react-icons/fa';
 import { useCart } from '../components/CartContext';
 import './heroSlider.css';
-
+import { useNavigate } from 'react-router-dom';
 
 export default function TshirtProducts() {
   const [tshirts, setTshirts] = useState([]);
