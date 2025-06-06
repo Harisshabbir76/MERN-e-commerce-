@@ -1261,17 +1261,7 @@ p {
   padding-bottom: 10px;
 }
 
-/* .category-header-decoration {
- height: 4px;
-  width: 100px;
-  background: linear-gradient(90deg, #3498db, #9b59b6);
-  margin: 0 auto;
-  border-radius: 4px;
-  position: absolute;
-  bottom: -40px; 
-  left: 50%;
-  transform: translateX(-50%);
-} */
+
 
 /* Loading State */
 .category-loading-container {
@@ -1395,10 +1385,7 @@ p {
     font-size: 1.8rem;
   }
   
-  .category-header-decoration {
-    width: 60px;
-    bottom: -8px;
-  }
+  
 }
 
 
