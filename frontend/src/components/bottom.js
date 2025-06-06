@@ -63,7 +63,7 @@ export default function TshirtProducts() {
     <Container className="tshirt-products-page py-5">
       <div className="page-header-wrapper mb-5">
         <h1 className="page-header">Bottom Collection</h1>
-        <div className="header-decoration"></div>
+        
       </div>
 
       {loading ? (

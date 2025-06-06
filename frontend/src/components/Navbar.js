@@ -40,7 +40,6 @@ const Navbar = () => {
   ];
 
   useEffect(() => {
-    // Check login status when component mounts or location changes
     const token = localStorage.getItem('token');
     setIsLoggedIn(!!token);
   }, [location]);
@@ -58,29 +57,30 @@ const Navbar = () => {
   };
 
   const handleSearch = (e) => {
-  e.preventDefault();
-  if (searchQuery.trim()) {
-    navigate(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
-    setIsSearchOpen(false);
-    setSearchQuery('');
-  }
-};
-
-
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
+      setIsSearchOpen(false);
+      setSearchQuery('');
+    }
+  };
 
   return (
     <>
-      {/* Gradient overlay for mobile menu */}
+      {/* Mobile Menu Overlay */}
       {isMenuOpen && (
         <div 
+          className="d-md-none"
           style={{
             position: 'fixed',
-            inset: 0,
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            opacity: 0.98,
+            top: '70px',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
             zIndex: 1040,
-            backdropFilter: 'blur(8px)'
           }}
+          onClick={() => setIsMenuOpen(false)}
         ></div>
       )}
 
@@ -108,7 +108,7 @@ const Navbar = () => {
             />
           </BootstrapNavbar.Brand>
 
-          {/* Mobile menu button */}
+          {/* Mobile menu and search buttons */}
           <div className="d-flex align-items-center">
             <Button 
               variant="link" 
@@ -227,62 +227,55 @@ const Navbar = () => {
         {/* Mobile Menu */}
         {isMenuOpen && (
           <div 
+            className="d-md-none"
             style={{
               position: 'fixed',
-              top: '6rem',
+              top: '70px',
               left: 0,
               right: 0,
               zIndex: 1050,
-              display: 'flex',
-              justifyContent: 'center',
-              padding: '0 1rem'
+              backgroundColor: 'white',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+              padding: '1rem',
+              borderTop: '1px solid rgba(0,0,0,0.1)'
             }}
           >
-            <div 
-              style={{
-                width: '100%',
-                maxWidth: '28rem',
-                backgroundColor: 'rgba(255,255,255,0.95)',
-                borderRadius: '0.75rem',
-                boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)',
-                padding: '1.5rem',
-                background: 'linear-gradient(to bottom right, rgba(255,255,255,0.98), rgba(255,255,255,0.92))',
-                backdropFilter: 'blur(12px)'
-              }}
-            >
-              {navLinks.map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  style={{
-                    display: 'block',
-                    padding: '0.75rem 1rem',
-                    borderRadius: '0.5rem',
-                    fontWeight: 500,
-                    fontSize: '1rem',
-                    transition: 'all 0.2s',
-                    color: location.pathname === link.path ? '#4f46e5' : '#1f2937',
-                    backgroundColor: location.pathname === link.path ? '#e0e7ff' : 'transparent',
-                    marginBottom: '0.25rem',
-                    textDecoration: 'none'
-                  }}
-                  onClick={() => setIsMenuOpen(false)}
-                  onMouseEnter={(e) => {
-                    if (location.pathname !== link.path) {
-                      e.target.style.color = '#4f46e5';
-                      e.target.style.backgroundColor = '#f9fafb';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (location.pathname !== link.path) {
-                      e.target.style.color = '#1f2937';
-                      e.target.style.backgroundColor = 'transparent';
-                    }
-                  }}
-                >
-                  {link.name}
-                </Link>
-              ))}
+            {navLinks.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                style={{
+                  display: 'block',
+                  padding: '0.75rem 1rem',
+                  borderRadius: '0.5rem',
+                  fontWeight: 500,
+                  fontSize: '1rem',
+                  color: location.pathname === link.path ? '#4f46e5' : '#1f2937',
+                  backgroundColor: location.pathname === link.path ? '#e0e7ff' : 'transparent',
+                  marginBottom: '0.25rem',
+                  textDecoration: 'none'
+                }}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {link.name}
+              </Link>
+            ))}
+            <div className="mt-3 pt-2 border-top">
+              <Link
+                to={isLoggedIn ? undefined : '/login'}
+                onClick={isLoggedIn ? handleLogout : undefined}
+                style={{
+                  display: 'block',
+                  padding: '0.75rem 1rem',
+                  borderRadius: '0.5rem',
+                  fontWeight: 500,
+                  fontSize: '1rem',
+                  color: '#1f2937',
+                  textDecoration: 'none'
+                }}
+              >
+                {isLoggedIn ? 'Logout' : 'Login'}
+              </Link>
             </div>
           </div>
         )}

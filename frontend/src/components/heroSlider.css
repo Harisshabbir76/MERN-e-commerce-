@@ -335,16 +335,21 @@
 .page-header {
   font-size: 2.5rem;
   color: #2c3e50;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem; /* Reduced from 1rem to match the spacing */
   font-weight: 600;
+  position: relative;
+  display: inline-block; /* Makes the underline only as wide as the text */
 }
 
 .header-decoration {
   height: 3px;
-  width: 80px;
+  width: 100%; /* Now spans the full width of the text */
   background: linear-gradient(90deg, #3498db, #9b59b6);
-  margin: 0 auto;
+  margin: 0 auto 1rem; /* Adjusted margin to control spacing */
   border-radius: 3px;
+  position: absolute;
+  bottom: -8px; /* Positions the line slightly below the text */
+  left: 0;
 }
 
 /* Product Card Styles */
