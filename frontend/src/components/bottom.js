@@ -62,14 +62,14 @@ export default function TshirtProducts() {
   return (
     <Container className="tshirt-products-page py-5">
       <div className="page-header-wrapper mb-5">
-        <h1 className="page-header">T-Shirt Collection</h1>
+        <h1 className="page-header">Bottom Collection</h1>
         <div className="header-decoration"></div>
       </div>
 
       {loading ? (
         <div className="text-center my-5 py-5">
           <Spinner animation="border" variant="primary" />
-          <p className="mt-3">Loading t-shirts...</p>
+          <p className="mt-3">Loading botttom...</p>
         </div>
       ) : error ? (
         <Alert variant="danger" className="text-center">

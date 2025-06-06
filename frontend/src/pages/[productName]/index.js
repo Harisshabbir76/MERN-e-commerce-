@@ -421,7 +421,10 @@ export default function ProductDetails() {
       {/* Recommended Products Section */}
       <Row className="mt-5">
         <Col>
-          <RecommendedProducts />
+          <RecommendedProducts 
+          currentProductId={product._id} 
+          category={product.category}
+        />
         </Col>
       </Row>
     </Container>
