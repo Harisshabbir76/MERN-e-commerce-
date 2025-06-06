@@ -14,7 +14,7 @@ export default function ContactUs() {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const res = await axios.get('https://sublime-magic-production.up.railway.app/catalog/show');
+        const res = await axios.get('https://sublime-magic-production.up.railway.app/contactus/show');
         setMessages(res.data);
       } catch (err) {
         setError(err.response?.data?.error || err.message);

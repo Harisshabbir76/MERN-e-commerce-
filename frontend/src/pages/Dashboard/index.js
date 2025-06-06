@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Container, Spinner, Button } from 'react-bootstrap';
 
 export default function Dashboard() {
     const navigate = useNavigate();
@@ -14,7 +15,7 @@ export default function Dashboard() {
                 const token = localStorage.getItem('token');
                 
                 if (!token) {
-                    navigate('/404');
+                    navigate('/login');
                     return;
                 }
 
@@ -25,15 +26,16 @@ export default function Dashboard() {
                     }
                 });
 
-                // Check if user is admin
-                if (response.data.user.email === 'Admin@gmail.com') {
+                // Check if user is admin (case-insensitive)
+                if (response.data.user.email.toLowerCase() === 'admin@gmail.com') {
                     setIsAuthorized(true);
                 } else {
-                    navigate('/404');
+                    navigate('/');
                 }
             } catch (error) {
                 console.error('Authentication error:', error);
-                navigate('/404');
+                localStorage.removeItem('token');
+                navigate('/login');
             } finally {
                 setIsLoading(false);
             }
@@ -43,7 +45,12 @@ export default function Dashboard() {
     }, [navigate]);
 
     if (isLoading) {
-        return <div>Loading...</div>;
+        return (
+            <Container className="text-center py-5">
+                <Spinner animation="border" variant="primary" />
+                <p className="mt-3">Loading dashboard...</p>
+            </Container>
+        );
     }
 
     if (!isAuthorized) {
@@ -51,15 +58,34 @@ export default function Dashboard() {
     }
 
     return (
-        <div>
-            <h1>Dashboard</h1>
-            <p>Welcome to the dashboard!</p>
-            <p>Here you can manage your account, view statistics, and more.</p>
-            <p>Use the navigation menu to access different sections of the application.</p>
-            <button onClick={() => navigate('/dashboard/add-product')}>Add Product</button>
-            <button onClick={() => navigate('/dashboard/order-management')}>Order Management</button>
-            <button onClick={() => navigate('/dashboard/contactus')}>Contact Us</button>
-
-        </div>
+        <Container className="py-5">
+            <h1 className="mb-4">Admin Dashboard</h1>
+            <div className="d-flex flex-wrap gap-3">
+                <Button 
+                    variant="primary" 
+                    size="lg"
+                    onClick={() => navigate('/dashboard/add-product')}
+                    className="p-4"
+                >
+                    Add New Product
+                </Button>
+                <Button 
+                    variant="success" 
+                    size="lg"
+                    onClick={() => navigate('/dashboard/order-management')}
+                    className="p-4"
+                >
+                    Order Management
+                </Button>
+                <Button 
+                    variant="info" 
+                    size="lg"
+                    onClick={() => navigate('/dashboard/contactus')}
+                    className="p-4"
+                >
+                    Customer Messages
+                </Button>
+            </div>
+        </Container>
     );
 }
