@@ -2,46 +2,92 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Container, Row, Col, Card, Spinner, Alert } from 'react-bootstrap';
 import { FaStar, FaShoppingCart } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../components/CartContext';
 import './heroSlider.css';
 
-export default function TshirtProducts() {
-  const [tshirts, setTshirts] = useState([]);
+export default function BottomProducts() {
+  const [bottoms, setBottoms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { addToCart } = useCart();
+  const navigate = useNavigate();
+
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return '/placeholder.jpg';
+    
+    // Ensure URLs are properly formatted
+    if (imagePath.startsWith('http')) {
+      // Force HTTPS if URL is insecure
+      return imagePath.replace(/^http:/, 'https:');
+    }
+    
+    // Handle relative paths
+    if (imagePath.startsWith('/')) {
+      return `https://sublime-magic-production.up.railway.app${imagePath}`;
+    }
+    
+    return '/placeholder.jpg';
+  };
+
+  const ProductImage = ({ src, alt, onClick }) => {
+    const [imgSrc, setImgSrc] = useState(getImageUrl(src));
+
+    return (
+      <Card.Img
+        variant="top"
+        onClick={onClick}
+        src={imgSrc}
+        alt={alt}
+        className="product-img"
+        onError={() => {
+          console.warn(`Failed to load image: ${src}`);
+          setImgSrc('/placeholder.jpg');
+        }}
+      />
+    );
+  };
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get('https://sublime-magic-production.up.railway.app/catalog');
-        const data = res.data;
+        const res = await axios.get('https://sublime-magic-production.up.railway.app/catalog', {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        console.log('Full API response:', res);
 
-        // Debug log to inspect API response
-        console.log('API response:', data);
-
-        let products = [];
-
-        if (Array.isArray(data)) {
-          products = data;
-        } else if (data && Array.isArray(data.data)) {
-          products = data.data;
-        } else if (data && Array.isArray(data.products)) {
-          products = data.products;
-        } else {
-          throw new Error('Unexpected API response: expected an array of products');
+        if (!res.data) {
+          throw new Error('No data received from API');
         }
 
-        const filtered = products.filter(p =>
-          p?.category?.toLowerCase()?.includes('t-shirt')
-        );
+        const data = Array.isArray(res.data) 
+          ? res.data 
+          : res.data.data || res.data.products || [];
 
-        setTshirts(filtered);
-        setError(filtered.length === 0 ? 'No t-shirts found' : null);
+        console.log('Processed products:', data);
+
+        const filtered = data.filter(product => {
+          const category = product.category?.toLowerCase() || '';
+          return category.includes('bottom') || 
+                 category.includes('pant') || 
+                 category.includes('trouser');
+        });
+
+        if (filtered.length === 0) {
+          console.warn('Available categories:', 
+            [...new Set(data.map(p => p.category?.toLowerCase()))]);
+          setError('No bottoms found. Check console for available categories.');
+        } else {
+          setBottoms(filtered);
+        }
       } catch (err) {
-        console.error('Fetch error:', err);
-        setError(err.message || 'Failed to load products');
-        setTshirts([]);
+        console.error('API Error:', err.response || err);
+        setError(err.response?.data?.message || err.message || 'Failed to fetch products');
+        setBottoms([]);
       } finally {
         setLoading(false);
       }
@@ -53,45 +99,39 @@ export default function TshirtProducts() {
   const handleAddToCart = (product) => {
     addToCart({
       ...product,
-      quantity: 1,
+      quantity: 1
     });
   };
 
   return (
-    <Container className="tshirt-products-page py-5">
-      <div className="page-header-wrapper mb-5">
-        <h1 className="page-header">T-Shirt Collection</h1>
-        <div className="header-decoration"></div>
+    <Container className="bottom-products-container py-5">
+      <div className="bottom-header-wrapper mb-5">
+        <h1 className="bottom-main-header">Bottom Collection</h1>
+        <div className="bottom-header-decoration"></div>
       </div>
 
       {loading ? (
         <div className="text-center my-5 py-5">
           <Spinner animation="border" variant="primary" />
-          <p className="mt-3">Loading t-shirts...</p>
+          <p className="mt-3">Loading bottoms...</p>
         </div>
       ) : error ? (
         <Alert variant="danger" className="text-center">
           {error}
+          <div className="mt-2">
+            <small>Check browser console for more details</small>
+          </div>
         </Alert>
       ) : (
         <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-          {tshirts.map(product => (
+          {bottoms.map(product => (
             <Col key={product._id || product.id}>
               <Card className="product-card h-100 border-0 shadow-sm">
                 <div className="product-image-container">
-                  <Card.Img
-                    onClick={() => navigate(`/product/${product.slug}`)}
-                    variant="top"
-                    src={
-                      product.image?.[0]
-                        ? `https://sublime-magic-production.up.railway.app${product.image[0]}`
-                        : '/placeholder.jpg'
-                    }
+                  <ProductImage
+                    src={product.image?.[0]}
                     alt={product.name}
-                    className="product-img"
-                    onError={(e) => {
-                      e.target.src = '/placeholder.jpg';
-                    }}
+                    onClick={() => navigate(`/product/${product.slug || product._id}`)}
                   />
                   {product.discountedPrice < product.originalPrice && (
                     <div className="discount-badge">
@@ -109,11 +149,11 @@ export default function TshirtProducts() {
                       <div className="price">
                         {product.discountedPrice < product.originalPrice && (
                           <span className="original-price text-muted text-decoration-line-through me-2">
-                            ${product.originalPrice}
+                            Rs {product.originalPrice}
                           </span>
                         )}
                         <span className="current-price fw-bold">
-                          ${product.discountedPrice || product.price}
+                          Rs {product.discountedPrice || product.price}
                         </span>
                       </div>
                       <div className="rating">
