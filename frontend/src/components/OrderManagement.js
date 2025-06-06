@@ -46,7 +46,7 @@ const OrderManagement = () => {
           return;
         }
 
-        const response = await axios.get('https://https://sublime-magic-production.up.railway.app/auth/me', {
+        const response = await axios.get('https://sublime-magic-production.up.railway.app/auth/me', {
           headers: {
             Authorization: `Bearer ${token}`
           }
