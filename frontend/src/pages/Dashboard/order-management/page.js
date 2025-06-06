@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { 
-  Tab, 
-  Tabs, 
-  Table, 
+  Container, 
   Button, 
-  Badge, 
-  Container,
+  Alert,
   Card,
   Spinner,
-  Modal
+  Table,
+  Badge,
+  Tabs,
+  Tab
 } from 'react-bootstrap';
 import { 
   FiRefreshCw, 
@@ -21,56 +20,26 @@ import OrderDetailsModal from './OrderDetailsModal';
 import ExportOrders from './ExportOrders';
 
 const OrderManagement = () => {
-  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [activeTab, setActiveTab] = useState('all');
   const [loading, setLoading] = useState(true);
-  const [authLoading, setAuthLoading] = useState(true);
-  const [isAuthorized, setIsAuthorized] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        
-        if (!token) {
-          navigate('/login');
-          return;
-        }
-
-        const response = await axios.get('https://sublime-magic-production.up.railway.app/auth/me', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        if (response.data.user.email.toLowerCase() === 'admin@gmail.com') {
-          setIsAuthorized(true);
-          fetchOrders();
-        } else {
-          navigate('/');
-        }
-      } catch (error) {
-        console.error('Authentication error:', error);
-        localStorage.removeItem('token');
-        navigate('/login');
-      } finally {
-        setAuthLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, [navigate]);
+  const [error, setError] = useState(null);
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('https://sublime-magic-production.up.railway.app/allOrder');
+      const response = await axios.get('https://sublime-magic-production.up.railway.app/allOrder', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
       setOrders(response.data);
-    } catch (error) {
-      console.error('Error fetching orders:', error);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching orders:', err);
+      setError('Failed to load orders. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -80,10 +49,15 @@ const OrderManagement = () => {
     try {
       await axios.put(`https://sublime-magic-production.up.railway.app/allOrder/${orderId}/status`, {
         status: newStatus
+      }, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
       });
       fetchOrders();
     } catch (error) {
       console.error('Error updating order status:', error);
+      setError('Failed to update order status.');
     }
   };
 
@@ -92,59 +66,65 @@ const OrderManagement = () => {
     setShowDetails(true);
   };
 
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
   const filteredOrders = {
     all: orders,
     delivery: orders.filter(order => order.status === 'out-for-delivery'),
     completed: orders.filter(order => order.status === 'completed')
   };
 
-  if (authLoading) {
-    return (
-      <Container className="text-center py-5">
-        <Spinner animation="border" variant="primary" />
-        <div className="mt-3">Checking authorization...</div>
-      </Container>
-    );
-  }
-
-  if (!isAuthorized) {
-    return null;
-  }
-
   if (loading) {
     return (
-      <Container className="text-center py-5">
+      <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
         <Spinner animation="border" variant="primary" />
-        <div className="mt-3">Loading orders...</div>
       </Container>
     );
   }
 
   return (
     <Container className="py-5">
-      <Card className="border-0 shadow">
-        <Card.Body className="p-0">
-          <div className="p-4 border-bottom">
-            <div className="d-flex justify-content-between align-items-center">
-              <h2 className="mb-0">Order Management</h2>
-              <div className="d-flex align-items-center gap-3">
-                <ExportOrders orders={orders} />
-                <Button 
-                  variant="primary"
-                  onClick={fetchOrders}
-                >
-                  <FiRefreshCw className="me-2" /> Refresh
-                </Button>
-              </div>
-            </div>
+      <Card className="shadow-sm p-4 mx-auto" style={{ maxWidth: '1200px' }}>
+        <h1 className="text-center mb-4" style={{
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          display: 'inline-block',
+          width: '100%'
+        }}>
+          Order Management
+        </h1>
+
+        {error && <Alert variant="danger" className="text-center">{error}</Alert>}
+
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <div className="d-flex align-items-center gap-3">
+            <ExportOrders orders={orders} />
+            <Button 
+              variant="primary"
+              onClick={fetchOrders}
+              style={{
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                border: 'none',
+                padding: '8px 16px',
+                fontWeight: '500'
+              }}
+            >
+              <FiRefreshCw className="me-2" /> Refresh Orders
+            </Button>
           </div>
-          
-          <Tabs
-            activeKey={activeTab}
-            onSelect={(k) => setActiveTab(k)}
-            className="px-4 pt-3"
-          >
-            <Tab eventKey="all" title={
+        </div>
+
+        <Tabs
+          activeKey={activeTab}
+          onSelect={(k) => setActiveTab(k)}
+          className="mb-4"
+        >
+          <Tab 
+            eventKey="all" 
+            title={
               <span className="d-flex align-items-center">
                 All Orders
                 {filteredOrders.all.length > 0 && (
@@ -153,15 +133,19 @@ const OrderManagement = () => {
                   </Badge>
                 )}
               </span>
-            }>
-              <OrderTable 
-                orders={filteredOrders.all} 
-                onStatusUpdate={updateOrderStatus}
-                onViewDetails={viewOrderDetails}
-                showAll={true}
-              />
-            </Tab>
-            <Tab eventKey="delivery" title={
+            }
+          >
+            <OrderTable 
+              orders={filteredOrders.all} 
+              onStatusUpdate={updateOrderStatus}
+              onViewDetails={viewOrderDetails}
+              showAll={true}
+              loading={loading}
+            />
+          </Tab>
+          <Tab 
+            eventKey="delivery" 
+            title={
               <span className="d-flex align-items-center">
                 <FiTruck className="me-1" /> Delivery
                 {filteredOrders.delivery.length > 0 && (
@@ -170,15 +154,19 @@ const OrderManagement = () => {
                   </Badge>
                 )}
               </span>
-            }>
-              <OrderTable 
-                orders={filteredOrders.delivery} 
-                onStatusUpdate={updateOrderStatus}
-                onViewDetails={viewOrderDetails}
-                showAll={false}
-              />
-            </Tab>
-            <Tab eventKey="completed" title={
+            }
+          >
+            <OrderTable 
+              orders={filteredOrders.delivery} 
+              onStatusUpdate={updateOrderStatus}
+              onViewDetails={viewOrderDetails}
+              showAll={false}
+              loading={loading}
+            />
+          </Tab>
+          <Tab 
+            eventKey="completed" 
+            title={
               <span className="d-flex align-items-center">
                 <FiCheckCircle className="me-1" /> Completed
                 {filteredOrders.completed.length > 0 && (
@@ -187,16 +175,17 @@ const OrderManagement = () => {
                   </Badge>
                 )}
               </span>
-            }>
-              <OrderTable 
-                orders={filteredOrders.completed} 
-                onStatusUpdate={updateOrderStatus}
-                onViewDetails={viewOrderDetails}
-                showAll={false}
-              />
-            </Tab>
-          </Tabs>
-        </Card.Body>
+            }
+          >
+            <OrderTable 
+              orders={filteredOrders.completed} 
+              onStatusUpdate={updateOrderStatus}
+              onViewDetails={viewOrderDetails}
+              showAll={false}
+              loading={loading}
+            />
+          </Tab>
+        </Tabs>
       </Card>
 
       <OrderDetailsModal 
@@ -208,7 +197,7 @@ const OrderManagement = () => {
   );
 };
 
-const OrderTable = ({ orders, onStatusUpdate, onViewDetails, showAll }) => {
+const OrderTable = ({ orders, onStatusUpdate, onViewDetails, showAll, loading }) => {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'pending':
@@ -222,61 +211,70 @@ const OrderTable = ({ orders, onStatusUpdate, onViewDetails, showAll }) => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="text-center py-4">
+        <Spinner animation="border" variant="primary" />
+        <p className="mt-2">Loading orders...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4">
-      <Table striped bordered hover responsive>
-        <thead>
+    <Table striped bordered hover responsive>
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Date</th>
+          <th>Products</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {orders.length === 0 ? (
           <tr>
-            <th>Order ID</th>
-            <th>Customer</th>
-            <th>Date</th>
-            <th>Products</th>
-            <th>Total</th>
-            <th>Status</th>
-            <th>Actions</th>
+            <td colSpan="7" className="text-center py-4">
+              No orders found
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {orders.length === 0 ? (
-            <tr>
-              <td colSpan="7" className="text-center py-4">
-                No orders found
+        ) : (
+          orders.map(order => (
+            <tr key={order._id}>
+              <td>
+                <Button 
+                  variant="link" 
+                  onClick={() => onViewDetails(order)}
+                  className="p-0 text-primary"
+                >
+                  {order._id.substring(0, 8)}...
+                </Button>
               </td>
-            </tr>
-          ) : (
-            orders.map(order => (
-              <tr key={order._id}>
-                <td>
-                  <Button 
-                    variant="link" 
-                    onClick={() => onViewDetails(order)}
-                  >
-                    {order._id.substring(0, 8)}...
-                  </Button>
-                </td>
-                <td>{order.customerName}</td>
-                <td>{new Date(order.orderDate).toLocaleDateString()}</td>
-                <td>
-                  {order.products.slice(0, 2).map(p => (
-                    <div key={p.productId}>
-                      {p.name} (x{p.quantity})
-                    </div>
-                  ))}
-                  {order.products.length > 2 && (
-                    <div className="text-muted">
-                      +{order.products.length - 2} more items
-                    </div>
-                  )}
-                </td>
-                <td>${order.totalAmount.toFixed(2)}</td>
-                <td>{getStatusBadge(order.status)}</td>
-                <td>
+              <td>{order.customerName}</td>
+              <td>{new Date(order.orderDate).toLocaleDateString()}</td>
+              <td>
+                {order.products.slice(0, 2).map(p => (
+                  <div key={p.productId}>
+                    {p.name} (x{p.quantity})
+                  </div>
+                ))}
+                {order.products.length > 2 && (
+                  <div className="text-muted">
+                    +{order.products.length - 2} more items
+                  </div>
+                )}
+              </td>
+              <td>${order.totalAmount.toFixed(2)}</td>
+              <td>{getStatusBadge(order.status)}</td>
+              <td>
+                <div className="d-flex flex-wrap gap-2">
                   {order.status === 'pending' && (
                     <Button 
                       variant="primary" 
                       size="sm"
                       onClick={() => onStatusUpdate(order._id, 'out-for-delivery')}
-                      className="me-2 mb-2"
                     >
                       Mark as Out for Delivery
                     </Button>
@@ -286,25 +284,24 @@ const OrderTable = ({ orders, onStatusUpdate, onViewDetails, showAll }) => {
                       variant="success" 
                       size="sm"
                       onClick={() => onStatusUpdate(order._id, 'completed')}
-                      className="me-2 mb-2"
                     >
                       Mark as Completed
                     </Button>
                   )}
                   <Button
-                    variant="outline-secondary"
+                    variant="outline-primary"
                     size="sm"
                     onClick={() => onViewDetails(order)}
                   >
                     View Details
                   </Button>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </Table>
-    </div>
+                </div>
+              </td>
+            </tr>
+          ))
+        )}
+      </tbody>
+    </Table>
   );
 };
 
