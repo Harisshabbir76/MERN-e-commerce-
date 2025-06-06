@@ -82,7 +82,7 @@ export default function TshirtProducts() {
               <Card className="product-card h-100 border-0 shadow-sm">
                 <div className="product-image-container">
                   <Card.Img
-                    onClick={() => navigate(`/product/${product.slug}`)}
+                    onClick={() => navigate(`/catalog/${product.slug}`)}
                     variant="top"
                     src={
                       product.image?.[0]
