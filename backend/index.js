@@ -398,7 +398,6 @@ app.get('/allOrder', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
 // Update order status
 app.put('/allOrder/:id/status', async (req, res) => {
   try {
@@ -413,7 +412,17 @@ app.put('/allOrder/:id/status', async (req, res) => {
   }
 });
 
-
+app.get('/order/:id', async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+    res.json(order);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 
 app.get('/verify-whatsapp/:phone', async (req, res) => {

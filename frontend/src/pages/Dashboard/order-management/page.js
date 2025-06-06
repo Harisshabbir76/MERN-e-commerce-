@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { 
   Container, 
@@ -9,17 +10,17 @@ import {
   Table,
   Badge,
   Tabs,
-  Tab
+  Tab,
+  Modal
 } from 'react-bootstrap';
 import { 
   FiRefreshCw, 
   FiTruck, 
   FiCheckCircle
 } from 'react-icons/fi';
-import OrderDetailsModal from './OrderDetailsModal';
-import ExportOrders from './ExportOrders';
 
 const OrderManagement = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [activeTab, setActiveTab] = useState('all');
   const [loading, setLoading] = useState(true);
@@ -47,13 +48,15 @@ const OrderManagement = () => {
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      await axios.put(`https://sublime-magic-production.up.railway.app/allOrder/${orderId}/status`, {
-        status: newStatus
-      }, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+      await axios.put(
+        `https://sublime-magic-production.up.railway.app/allOrder/${orderId}/status`,
+        { status: newStatus },
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
         }
-      });
+      );
       fetchOrders();
     } catch (error) {
       console.error('Error updating order status:', error);
@@ -87,34 +90,17 @@ const OrderManagement = () => {
   return (
     <Container className="py-5">
       <Card className="shadow-sm p-4 mx-auto" style={{ maxWidth: '1200px' }}>
-        <h1 className="text-center mb-4" style={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          display: 'inline-block',
-          width: '100%'
-        }}>
-          Order Management
-        </h1>
+        <h1 className="text-center mb-4">Order Management</h1>
 
         {error && <Alert variant="danger" className="text-center">{error}</Alert>}
 
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <div className="d-flex align-items-center gap-3">
-            <ExportOrders orders={orders} />
-            <Button 
-              variant="primary"
-              onClick={fetchOrders}
-              style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                border: 'none',
-                padding: '8px 16px',
-                fontWeight: '500'
-              }}
-            >
-              <FiRefreshCw className="me-2" /> Refresh Orders
-            </Button>
-          </div>
+          <Button 
+            variant="primary"
+            onClick={fetchOrders}
+          >
+            <FiRefreshCw className="me-2" /> Refresh Orders
+          </Button>
         </div>
 
         <Tabs
@@ -122,67 +108,25 @@ const OrderManagement = () => {
           onSelect={(k) => setActiveTab(k)}
           className="mb-4"
         >
-          <Tab 
-            eventKey="all" 
-            title={
-              <span className="d-flex align-items-center">
-                All Orders
-                {filteredOrders.all.length > 0 && (
-                  <Badge pill bg="secondary" className="ms-2">
-                    {filteredOrders.all.length}
-                  </Badge>
-                )}
-              </span>
-            }
-          >
+          <Tab eventKey="all" title="All Orders">
             <OrderTable 
               orders={filteredOrders.all} 
               onStatusUpdate={updateOrderStatus}
               onViewDetails={viewOrderDetails}
-              showAll={true}
-              loading={loading}
             />
           </Tab>
-          <Tab 
-            eventKey="delivery" 
-            title={
-              <span className="d-flex align-items-center">
-                <FiTruck className="me-1" /> Delivery
-                {filteredOrders.delivery.length > 0 && (
-                  <Badge pill bg="primary" className="ms-2">
-                    {filteredOrders.delivery.length}
-                  </Badge>
-                )}
-              </span>
-            }
-          >
+          <Tab eventKey="delivery" title="Delivery">
             <OrderTable 
               orders={filteredOrders.delivery} 
               onStatusUpdate={updateOrderStatus}
               onViewDetails={viewOrderDetails}
-              showAll={false}
-              loading={loading}
             />
           </Tab>
-          <Tab 
-            eventKey="completed" 
-            title={
-              <span className="d-flex align-items-center">
-                <FiCheckCircle className="me-1" /> Completed
-                {filteredOrders.completed.length > 0 && (
-                  <Badge pill bg="success" className="ms-2">
-                    {filteredOrders.completed.length}
-                  </Badge>
-                )}
-              </span>
-            }
-          >
+          <Tab eventKey="completed" title="Completed">
             <OrderTable 
               orders={filteredOrders.completed} 
               onStatusUpdate={updateOrderStatus}
               onViewDetails={viewOrderDetails}
-              showAll={false}
-              loading={loading}
             />
           </Tab>
         </Tabs>
@@ -197,7 +141,7 @@ const OrderManagement = () => {
   );
 };
 
-const OrderTable = ({ orders, onStatusUpdate, onViewDetails, showAll, loading }) => {
+const OrderTable = ({ orders, onStatusUpdate, onViewDetails }) => {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'pending':
@@ -211,15 +155,6 @@ const OrderTable = ({ orders, onStatusUpdate, onViewDetails, showAll, loading })
     }
   };
 
-  if (loading) {
-    return (
-      <div className="text-center py-4">
-        <Spinner animation="border" variant="primary" />
-        <p className="mt-2">Loading orders...</p>
-      </div>
-    );
-  }
-
   return (
     <Table striped bordered hover responsive>
       <thead>
@@ -227,7 +162,6 @@ const OrderTable = ({ orders, onStatusUpdate, onViewDetails, showAll, loading })
           <th>Order ID</th>
           <th>Customer</th>
           <th>Date</th>
-          <th>Products</th>
           <th>Total</th>
           <th>Status</th>
           <th>Actions</th>
@@ -236,7 +170,7 @@ const OrderTable = ({ orders, onStatusUpdate, onViewDetails, showAll, loading })
       <tbody>
         {orders.length === 0 ? (
           <tr>
-            <td colSpan="7" className="text-center py-4">
+            <td colSpan="6" className="text-center py-4">
               No orders found
             </td>
           </tr>
@@ -247,61 +181,112 @@ const OrderTable = ({ orders, onStatusUpdate, onViewDetails, showAll, loading })
                 <Button 
                   variant="link" 
                   onClick={() => onViewDetails(order)}
-                  className="p-0 text-primary"
                 >
                   {order._id.substring(0, 8)}...
                 </Button>
               </td>
               <td>{order.customerName}</td>
               <td>{new Date(order.orderDate).toLocaleDateString()}</td>
-              <td>
-                {order.products.slice(0, 2).map(p => (
-                  <div key={p.productId}>
-                    {p.name} (x{p.quantity})
-                  </div>
-                ))}
-                {order.products.length > 2 && (
-                  <div className="text-muted">
-                    +{order.products.length - 2} more items
-                  </div>
-                )}
-              </td>
               <td>${order.totalAmount.toFixed(2)}</td>
               <td>{getStatusBadge(order.status)}</td>
               <td>
-                <div className="d-flex flex-wrap gap-2">
-                  {order.status === 'pending' && (
-                    <Button 
-                      variant="primary" 
-                      size="sm"
-                      onClick={() => onStatusUpdate(order._id, 'out-for-delivery')}
-                    >
-                      Mark as Out for Delivery
-                    </Button>
-                  )}
-                  {order.status === 'out-for-delivery' && (
-                    <Button 
-                      variant="success" 
-                      size="sm"
-                      onClick={() => onStatusUpdate(order._id, 'completed')}
-                    >
-                      Mark as Completed
-                    </Button>
-                  )}
-                  <Button
-                    variant="outline-primary"
+                {order.status === 'pending' && (
+                  <Button 
+                    variant="primary" 
                     size="sm"
-                    onClick={() => onViewDetails(order)}
+                    onClick={() => onStatusUpdate(order._id, 'out-for-delivery')}
+                    className="me-2"
                   >
-                    View Details
+                    Mark as Out for Delivery
                   </Button>
-                </div>
+                )}
+                {order.status === 'out-for-delivery' && (
+                  <Button 
+                    variant="success" 
+                    size="sm"
+                    onClick={() => onStatusUpdate(order._id, 'completed')}
+                    className="me-2"
+                  >
+                    Mark as Completed
+                  </Button>
+                )}
+                <Button
+                  variant="outline-secondary"
+                  size="sm"
+                  onClick={() => onViewDetails(order)}
+                >
+                  View Details
+                </Button>
               </td>
             </tr>
           ))
         )}
       </tbody>
     </Table>
+  );
+};
+
+const OrderDetailsModal = ({ show, onHide, order }) => {
+  if (!order) return null;
+
+  return (
+    <Modal show={show} onHide={onHide} size="lg">
+      <Modal.Header closeButton>
+        <Modal.Title>Order Details</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <div className="mb-3">
+          <h5>Order ID: {order._id}</h5>
+          <p>Date: {new Date(order.orderDate).toLocaleString()}</p>
+        </div>
+        
+        <div className="mb-3">
+          <h6>Customer Information</h6>
+          <p>Name: {order.customerName}</p>
+          <p>Email: {order.email}</p>
+          <p>Phone: {order.phone}</p>
+          <p>Address: {order.address}, {order.city}, {order.zipCode}</p>
+        </div>
+        
+        <div className="mb-3">
+          <h6>Products</h6>
+          <Table striped bordered>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {order.products.map((product, index) => (
+                <tr key={index}>
+                  <td>{product.name}</td>
+                  <td>{product.quantity}</td>
+                  <td>${product.price.toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+        
+        <div>
+          <h6>Order Summary</h6>
+          <p>Subtotal: ${order.totalAmount.toFixed(2)}</p>
+          <p>Status: <Badge bg={
+            order.status === 'completed' ? 'success' : 
+            order.status === 'out-for-delivery' ? 'primary' : 'warning'
+          }>
+            {order.status}
+          </Badge></p>
+        </div>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={onHide}>
+          Close
+        </Button>
+      </Modal.Footer>
+    </Modal>
   );
 };
 
