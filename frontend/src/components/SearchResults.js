@@ -158,7 +158,7 @@ const ProductCard = ({ product, onAddToCart, onViewDetails }) => {
           />
           {product.discountedPrice < product.price && (
             <div className="discount-badge">
-              {Math.round(100 - (product.discountedPrice / product.price * 100)}% OFF
+             {Math.round(100 - (product.discountedPrice / product.price * 100))}% OFF
             </div>
           )}
           <Badge 
