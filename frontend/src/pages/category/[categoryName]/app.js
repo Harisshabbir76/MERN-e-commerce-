@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Container, Row, Col, Card, Spinner, Alert, Button, Badge } from 'react-bootstrap';
 import { FaShoppingCart, FaBoxOpen, FaStar } from 'react-icons/fa';
 import { CartContext } from '../../../components/CartContext';
-import '../App.css';
+import '../../../App.css';
 
 export default function CategoryProducts() {
   const { categoryName } = useParams();
