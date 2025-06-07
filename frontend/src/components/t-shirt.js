@@ -19,7 +19,6 @@ export default function TshirtProducts() {
         const res = await axios.get('https://sublime-magic-production.up.railway.app/catalog');
         const data = res.data;
 
-        // Debug log to inspect API response
         console.log('API response:', data);
 
         let products = [];
@@ -59,11 +58,70 @@ export default function TshirtProducts() {
     });
   };
 
+  // Function to render product card
+  const renderProductCard = (product) => (
+    <Col key={product._id || product.id}>
+      <Card className="product-card h-100 border-0 shadow-sm">
+        <div className="product-image-container">
+          <Card.Img
+            onClick={() => navigate(`/catalog/${product.slug}`)}
+            variant="top"
+            src={
+              product.image?.[0]
+                ? `https://sublime-magic-production.up.railway.app${product.image[0]}`
+                : '/placeholder.jpg'
+            }
+            alt={product.name}
+            className="product-img"
+            onError={(e) => {
+              e.target.src = '/placeholder.jpg';
+            }}
+          />
+          {product.discountedPrice < product.originalPrice && (
+            <div className="discount-badge">
+              {Math.round(100 - (product.discountedPrice / product.originalPrice) * 100)}% OFF
+            </div>
+          )}
+        </div>
+        <Card.Body className="d-flex flex-column">
+          <Card.Title className="product-title">{product.name}</Card.Title>
+          <Card.Text className="text-muted product-category">
+            {product.category || 'Uncategorized'}
+          </Card.Text>
+          <div className="mt-auto">
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <div className="price">
+                {product.discountedPrice < product.originalPrice && (
+                  <span className="original-price text-muted text-decoration-line-through me-2">
+                    ${product.originalPrice}
+                  </span>
+                )}
+                <span className="current-price fw-bold">
+                  ${product.discountedPrice || product.price}
+                </span>
+              </div>
+              <div className="rating">
+                <FaStar className="text-warning" />
+                <span className="ms-1">{product.rating || '4.5'}</span>
+              </div>
+            </div>
+            <button
+              className="add-to-cart-btn w-100 mt-2"
+              onClick={() => handleAddToCart(product)}
+            >
+              <FaShoppingCart className="me-2" />
+              Add to Cart
+            </button>
+          </div>
+        </Card.Body>
+      </Card>
+    </Col>
+  );
+
   return (
-    <Container className="tshirt-products-page py-5">
-      <div className="page-header-wrapper mb-5">
+    <Container className="tshirt-products-page py-3 py-md-5">
+      <div className="page-header-wrapper mb-4 mb-md-5">
         <h1 className="page-header">T-Shirt Collection</h1>
-        
       </div>
 
       {loading ? (
@@ -76,66 +134,21 @@ export default function TshirtProducts() {
           {error}
         </Alert>
       ) : (
-        <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-          {tshirts.map(product => (
-            <Col key={product._id || product.id}>
-              <Card className="product-card h-100 border-0 shadow-sm">
-                <div className="product-image-container">
-                  <Card.Img
-                    onClick={() => navigate(`/catalog/${product.slug}`)}
-                    variant="top"
-                    src={
-                      product.image?.[0]
-                        ? `https://sublime-magic-production.up.railway.app${product.image[0]}`
-                        : '/placeholder.jpg'
-                    }
-                    alt={product.name}
-                    className="product-img"
-                    onError={(e) => {
-                      e.target.src = '/placeholder.jpg';
-                    }}
-                  />
-                  {product.discountedPrice < product.originalPrice && (
-                    <div className="discount-badge">
-                      {Math.round(100 - (product.discountedPrice / product.originalPrice) * 100)}% OFF
-                    </div>
-                  )}
-                </div>
-                <Card.Body className="d-flex flex-column">
-                  <Card.Title className="product-title">{product.name}</Card.Title>
-                  <Card.Text className="text-muted product-category">
-                    {product.category || 'Uncategorized'}
-                  </Card.Text>
-                  <div className="mt-auto">
-                    <div className="d-flex justify-content-between align-items-center mb-2">
-                      <div className="price">
-                        {product.discountedPrice < product.originalPrice && (
-                          <span className="original-price text-muted text-decoration-line-through me-2">
-                            ${product.originalPrice}
-                          </span>
-                        )}
-                        <span className="current-price fw-bold">
-                          ${product.discountedPrice || product.price}
-                        </span>
-                      </div>
-                      <div className="rating">
-                        <FaStar className="text-warning" />
-                        <span className="ms-1">{product.rating || '4.5'}</span>
-                      </div>
-                    </div>
-                    <button
-                      className="add-to-cart-btn w-100 mt-2"
-                      onClick={() => handleAddToCart(product)}
-                    >
-                      <FaShoppingCart className="me-2" />
-                      Add to Cart
-                    </button>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+        <>
+          {/* Mobile view - show only 4 products (2x2 grid) */}
+          <div className="d-block d-md-none">
+            <Row xs={2} className="g-3">
+              {tshirts.slice(0, 4).map(product => renderProductCard(product))}
+            </Row>
+          </div>
+          
+          {/* Tablet/Desktop view - show all products with responsive columns */}
+          <div className="d-none d-md-block">
+            <Row xs={1} sm={2} md={3} lg={4} className="g-4">
+              {tshirts.map(product => renderProductCard(product))}
+            </Row>
+          </div>
+        </>
       )}
     </Container>
   );

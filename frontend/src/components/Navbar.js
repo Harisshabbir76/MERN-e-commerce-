@@ -241,8 +241,9 @@ const Navbar = () => {
             }}
           >
             {navLinks.map((link) => (
-              <Link
+              <Nav.Link
                 key={link.path}
+                as={Link}
                 to={link.path}
                 style={{
                   display: 'block',
@@ -258,12 +259,18 @@ const Navbar = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 {link.name}
-              </Link>
+              </Nav.Link>
             ))}
             <div className="mt-3 pt-2 border-top">
-              <Link
+              <Nav.Link
+                as={Link}
                 to={isLoggedIn ? undefined : '/login'}
-                onClick={isLoggedIn ? handleLogout : undefined}
+                onClick={() => {
+                  if (isLoggedIn) {
+                    handleLogout();
+                  }
+                  setIsMenuOpen(false);
+                }}
                 style={{
                   display: 'block',
                   padding: '0.75rem 1rem',
@@ -275,7 +282,7 @@ const Navbar = () => {
                 }}
               >
                 {isLoggedIn ? 'Logout' : 'Login'}
-              </Link>
+              </Nav.Link>
             </div>
           </div>
         )}

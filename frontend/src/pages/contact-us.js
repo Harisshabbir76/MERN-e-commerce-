@@ -1,22 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { 
-  Container, 
-  Form, 
-  Button,
-  Alert
-} from 'react-bootstrap';
-import { 
-  FaPaperPlane, 
-  FaUser, 
-  FaEnvelope,
-  FaTag, 
-  FaComment,
-  FaCheckCircle,
-  FaTimesCircle
-} from 'react-icons/fa';
-import Popup from '../components/popup'
-import '../components/heroSlider.css';
+import { Container, Form, Button, Alert, Spinner } from 'react-bootstrap';
+import { FaPaperPlane, FaUser, FaEnvelope, FaTag, FaComment, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import Popup from '../components/popup';
+import './App.css';
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
@@ -50,16 +37,13 @@ const ContactUs = () => {
       title: "Success!",
       headerClass: "bg-success text-white",
       content: (
-        <div className="popup-content">
-          <div className="d-flex align-items-center mb-3">
-            <FaCheckCircle className="text-success me-2" size={24} />
-            <h5 className="mb-0">Message Sent!</h5>
-          </div>
-          <p>{message}</p>
-          <p className="small text-muted mt-2">
+        <div className="popup-content text-center">
+          <FaCheckCircle className="text-success mb-3" size={48} />
+          <h5 className="mb-2">Message Sent Successfully!</h5>
+          <p className="mb-3">{message}</p>
+          <p className="small text-muted">
             We'll respond to your inquiry within 24 hours.
           </p>
-          <div className="popup-decoration"></div>
         </div>
       ),
       footerContent: (
@@ -68,7 +52,7 @@ const ContactUs = () => {
           onClick={hidePopup}
           className="px-4"
         >
-          OK!
+          OK
         </Button>
       )
     });
@@ -80,31 +64,28 @@ const ContactUs = () => {
       title: "Error",
       headerClass: "bg-danger text-white",
       content: (
-        <div className="popup-content">
-          <div className="d-flex align-items-center mb-3">
-            <FaTimesCircle className="text-danger me-2" size={24} />
-            <h5 className="mb-0">Sending Failed</h5>
-          </div>
+        <div className="popup-content text-center">
+          <FaTimesCircle className="text-danger mb-3" size={48} />
+          <h5 className="mb-2">Sending Failed</h5>
           <Alert variant="light" className="mb-3">
             {message}
           </Alert>
           <p>Please check your information and try again.</p>
-          <div className="popup-decoration error"></div>
         </div>
       ),
       footerContent: (
-        <div className="d-flex gap-3">
+        <div className="d-flex gap-2 justify-content-center w-100">
           <Button 
             variant="outline-secondary" 
             onClick={hidePopup}
-            className="px-4"
+            className="px-3"
           >
             Cancel
           </Button>
           <Button 
             variant="danger" 
             onClick={handleSubmit}
-            className="px-4"
+            className="px-3"
           >
             Try Again
           </Button>
@@ -136,88 +117,101 @@ const ContactUs = () => {
   };
 
   return (
-    <Container className="contact-us-container">
-      <div className="contact-header-wrapper">
-        <h2 className="contact-header">Get In Touch</h2>
-        <div className="header-decoration"></div>
+    <Container className="contact-page py-5">
+      <div className="page-header-wrapper mb-5 text-center">
+        <h1 className="page-header">Contact Us</h1>
+        <div className="header-decoration mx-auto"></div>
+        <p className="lead mt-3">We'd love to hear from you!</p>
       </div>
       
-      <Form onSubmit={handleSubmit} className="contact-form">
-        <Form.Group controlId="name" className="mb-4 form-group">
-          <div className="input-icon">
-            <FaUser />
-          </div>
-          <Form.Control
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            placeholder="Your Name"
-            className="form-input"
-          />
-          <div className="input-highlight"></div>
-        </Form.Group>
+      <Row className="justify-content-center">
+        <Col xs={12} md={10} lg={8}>
+          <Form onSubmit={handleSubmit} className="contact-form p-4 p-md-5 shadow-sm rounded-3 bg-white">
+            <Form.Group controlId="name" className="mb-4 form-group">
+              <div className="input-icon">
+                <FaUser className="text-muted" />
+              </div>
+              <Form.Control
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                placeholder="Your Name"
+                className="form-input py-3 ps-5"
+              />
+            </Form.Group>
 
-        <Form.Group controlId="email" className="mb-4 form-group">
-          <div className="input-icon">
-            <FaEnvelope />
-          </div>
-          <Form.Control
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            placeholder="Your Email"
-            className="form-input"
-          />
-          <div className="input-highlight"></div>
-        </Form.Group>
+            <Form.Group controlId="email" className="mb-4 form-group">
+              <div className="input-icon">
+                <FaEnvelope className="text-muted" />
+              </div>
+              <Form.Control
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                placeholder="Your Email"
+                className="form-input py-3 ps-5"
+              />
+            </Form.Group>
 
-        <Form.Group controlId="subject" className="mb-4 form-group">
-          <div className="input-icon">
-            <FaTag />
-          </div>
-          <Form.Control
-            type="text"
-            name="subject"
-            value={formData.subject}
-            onChange={handleChange}
-            required
-            placeholder="Subject"
-            className="form-input"
-          />
-          <div className="input-highlight"></div>
-        </Form.Group>
+            <Form.Group controlId="subject" className="mb-4 form-group">
+              <div className="input-icon">
+                <FaTag className="text-muted" />
+              </div>
+              <Form.Control
+                type="text"
+                name="subject"
+                value={formData.subject}
+                onChange={handleChange}
+                required
+                placeholder="Subject"
+                className="form-input py-3 ps-5"
+              />
+            </Form.Group>
 
-        <Form.Group controlId="message" className="mb-4 form-group">
-          <div className="input-icon">
-            <FaComment />
-          </div>
-          <Form.Control
-            as="textarea"
-            rows={5}
-            name="message"
-            value={formData.message}
-            onChange={handleChange}
-            required
-            placeholder="Your Message"
-            className="form-input"
-          />
-          <div className="input-highlight"></div>
-        </Form.Group>
+            <Form.Group controlId="message" className="mb-4 form-group">
+              <div className="input-icon align-items-start pt-3">
+                <FaComment className="text-muted" />
+              </div>
+              <Form.Control
+                as="textarea"
+                rows={5}
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
+                required
+                placeholder="Your Message"
+                className="form-input py-3 ps-5"
+              />
+            </Form.Group>
 
-        <Button 
-          variant="primary" 
-          type="submit" 
-          disabled={isSubmitting}
-          className="submit-btn"
-        >
-          <FaPaperPlane className="me-2" />
-          {isSubmitting ? 'Sending...' : 'Send Message'}
-        </Button>
-      </Form>
+            <div className="text-center mt-4">
+              <Button 
+                variant="primary" 
+                type="submit" 
+                disabled={isSubmitting}
+                className="submit-btn py-3 px-5 rounded-pill fw-bold"
+                style={{ minWidth: '200px' }}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Spinner as="span" animation="border" size="sm" className="me-2" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <FaPaperPlane className="me-2" />
+                    Send Message
+                  </>
+                )}
+              </Button>
+            </div>
+          </Form>
+        </Col>
+      </Row>
 
       <Popup
         show={popupConfig.show}
@@ -226,6 +220,7 @@ const ContactUs = () => {
         headerClass={popupConfig.headerClass}
         footerContent={popupConfig.footerContent}
         bodyClass="py-4 px-3"
+        centered
       >
         {popupConfig.content}
       </Popup>

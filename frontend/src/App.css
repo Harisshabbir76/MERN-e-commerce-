@@ -23,3 +23,148 @@ button:focus, input:focus {
 ::-webkit-scrollbar-thumb:hover {
   background: #a5b4fc;
 }
+
+
+/* catalog css */
+
+/* Additional styles for Catalog page */
+.stock-badge {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  font-size: 0.75rem;
+  padding: 3px 8px;
+}
+
+.discount-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #e74c3c;
+  color: white;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  z-index: 1;
+}
+
+.add-to-cart-btn.disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
+
+.add-to-cart-btn.disabled:hover {
+  transform: none;
+  background-color: #95a5a6;
+}
+
+
+
+/* category product css */
+
+.stock-badge {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  font-size: 0.75rem;
+  padding: 3px 8px;
+}
+
+.product-card[disabled] {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.product-card[disabled] .product-img {
+  filter: grayscale(30%);
+}
+
+.product-card[disabled]:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+
+/* contact us css */
+
+/* Contact Page Styles */
+.contact-page {
+  min-height: 80vh;
+}
+
+.contact-form {
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.contact-form:hover {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  position: relative;
+}
+
+.input-icon {
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  transform: translateY(-50%);
+  z-index: 2;
+  font-size: 1.1rem;
+}
+
+.form-input {
+  padding-left: 45px !important;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px !important;
+  transition: all 0.3s ease;
+}
+
+.form-input:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+}
+
+.submit-btn {
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #3498db, #9b59b6);
+  border: none;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.submit-btn:disabled {
+  opacity: 0.7;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767.98px) {
+  .contact-form {
+    padding: 2rem !important;
+  }
+  
+  .page-header {
+    font-size: 2rem;
+  }
+  
+  .form-input {
+    padding-left: 40px !important;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .contact-form {
+    padding: 1.5rem !important;
+  }
+  
+  .input-icon {
+    left: 12px;
+    font-size: 1rem;
+  }
+}

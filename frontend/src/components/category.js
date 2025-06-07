@@ -43,77 +43,74 @@ export default function Category() {
     return categoryImages[category] || 'https://via.placeholder.com/300';
   };
 
+  // Function to render category card
+  const renderCategoryCard = (category, isBrowseAll = false) => (
+    <Col key={isBrowseAll ? 'browse-all' : category} className="mb-4">
+      <Card 
+        className="product-card h-100"
+        onClick={() => 
+          isBrowseAll 
+            ? navigate('/category') 
+            : navigate(`/category/${category.toString().replace(/\s+/g, '-')}`)
+        }
+        role="button"
+      >
+        <div className="product-image-container">
+          <Card.Img
+            variant="top"
+            src={isBrowseAll ? BrowseImg : getCategoryImage(category)}
+            alt={isBrowseAll ? 'Browse All' : category}
+            className="product-img"
+          />
+        </div>
+        <Card.Body className="d-flex flex-column">
+          <Card.Title className="product-title text-capitalize">
+            {isBrowseAll ? 'Browse All' : category}
+            <FaChevronRight className="ms-2" style={{ color: '#3498db' }} />
+          </Card.Title>
+          {isBrowseAll && (
+            <Card.Text className="text-muted product-category">
+              See all categories
+            </Card.Text>
+          )}
+        </Card.Body>
+      </Card>
+    </Col>
+  );
+
   return (
-    <Container className="category-container py-5">
-      <div className="category-header-wrapper">
-        <h1 className="category-main-header">Shop by Category</h1>
+    <Container className="tshirt-products-page py-3 py-md-5">
+      <div className="page-header-wrapper mb-4 mb-md-5">
+        <h1 className="page-header">Shop by Category</h1>
       </div>
 
-      {loading && (
-        <div className="category-loading-container">
-          <Spinner animation="border" variant="primary" className="category-spinner" />
-          <p className="category-loading-text">Loading categories...</p>
+      {loading ? (
+        <div className="text-center my-5 py-5">
+          <Spinner animation="border" variant="primary" />
+          <p className="mt-3">Loading categories...</p>
         </div>
-      )}
-
-      {error && (
-        <Alert variant="danger" className="category-error-alert">
+      ) : error ? (
+        <Alert variant="danger" className="text-center">
           Error loading categories: {error.message}
         </Alert>
-      )}
-
-      {!loading && !error && (
-        <Row xs={1} sm={2} md={3} lg={5} className="category-grid g-4">
-          {Array.isArray(categories) && categories.slice(0, 4).map((category, index) => (
-            <Col key={index} className="category-col">
-              <Card 
-                className="category-card h-100"
-                onClick={() =>
-                navigate(`/category/${category.toString().replace(/\s+/g, '-')}`)}
-                role="button"
-              >
-                <div className="category-img-container">
-                  <Card.Img
-                    variant="top"
-                    src={getCategoryImage(category)}
-                    alt={category}
-                    className="category-img"
-                  />
-                </div>
-                <Card.Body className="category-card-body">
-                  <Card.Title className="category-name text-capitalize">
-                    {category}
-                    <FaChevronRight className="category-arrow ms-2" />
-                  </Card.Title>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-
-          <Col className="category-col">
-            <Card 
-              className="category-card h-100"
-              onClick={() => navigate('/category')}
-              role="button"
-            >
-              <div className="category-img-container">
-                <Card.Img
-                  variant="top"
-                  src={BrowseImg}
-                  alt="Browse All"
-                  className="category-img"
-                />
-              </div>
-              <Card.Body className="category-card-body">
-                <Card.Title className="category-name">
-                  Browse All
-                  <FaChevronRight className="category-arrow ms-2" />
-                </Card.Title>
-                <Card.Text className="category-subtext">See all categories</Card.Text>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
+      ) : (
+        <>
+          {/* Mobile view - show only 3 categories + browse all (2x2 grid) */}
+          <div className="d-block d-md-none">
+            <Row xs={2} className="g-3">
+              {categories.slice(0, 3).map(category => renderCategoryCard(category))}
+              {renderCategoryCard(null, true)}
+            </Row>
+          </div>
+          
+          {/* Tablet/Desktop view - show all categories with responsive columns */}
+          <div className="d-none d-md-block">
+            <Row xs={1} sm={2} md={3} lg={5} className="g-4">
+              {categories.slice(0, 4).map(category => renderCategoryCard(category))}
+              {renderCategoryCard(null, true)}
+            </Row>
+          </div>
+        </>
       )}
     </Container>
   );

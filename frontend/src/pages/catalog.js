@@ -12,11 +12,9 @@ import {
   Badge,
   Stack
 } from 'react-bootstrap';
-import { FaShoppingCart, FaBoxOpen } from 'react-icons/fa';
+import { FaShoppingCart, FaBoxOpen, FaStar } from 'react-icons/fa';
 import { CartContext } from '../components/CartContext';
-
-// Placeholder image if product has no images
-const placeholderImg = '/placeholder.jpg';
+import './App.css';
 
 export default function Catalog() {
   const [products, setProducts] = useState([]);
@@ -29,13 +27,27 @@ export default function Catalog() {
     const fetchProducts = async () => {
       try {
         const res = await axios.get('https://sublime-magic-production.up.railway.app/catalog');
-        setProducts(res.data.map(product => ({
+        const data = res.data;
+
+        let products = [];
+
+        if (Array.isArray(data)) {
+          products = data;
+        } else if (data && Array.isArray(data.data)) {
+          products = data.data;
+        } else if (data && Array.isArray(data.products)) {
+          products = data.products;
+        } else {
+          throw new Error('Unexpected API response: expected an array of products');
+        }
+
+        setProducts(products.map(product => ({
           ...product,
-          // Use actual stock value if provided, otherwise default random 5-20
-          stock: product.stock !== undefined ? product.stock : Math.floor(Math.random() * 16) + 5
+          stock: product.stock !== undefined ? product.stock : Math.floor(Math.random() * 16) + 5,
+          rating: product.rating || (Math.random() * 1 + 4).toFixed(1) // Default rating 4.0-5.0
         })));
-      } catch (error) {
-        setError(error.response?.data?.error || 'Failed to load products');
+      } catch (err) {
+        setError(err.message || 'Failed to load products');
       } finally {
         setLoading(false);
       }
@@ -45,19 +57,9 @@ export default function Catalog() {
   }, []);
 
   const getProductImage = (product) => {
-    if (!product || !product.image || product.image.length === 0) {
-      return placeholderImg;
-    }
-
-    const img = product.image[0];
-
-    // If image is a full URL, return as is
-    if (img.startsWith('http://') || img.startsWith('https://')) {
-      return img;
-    }
-
-    // Otherwise, prepend server base URL
-    return `https://sublime-magic-production.up.railway.app${img}`;
+    if (!product?.image?.[0]) return '/placeholder.jpg';
+    if (product.image[0].startsWith('http')) return product.image[0];
+    return `https://sublime-magic-production.up.railway.app${product.image[0]}`;
   };
 
   const handleAddToCart = (product) => {
@@ -69,110 +71,109 @@ export default function Catalog() {
     }
   };
 
+  // Function to render product card
+  const renderProductCard = (product) => (
+    <Col key={product._id || product.id}>
+      <Card className="product-card h-100 border-0 shadow-sm">
+        <div className="product-image-container">
+          <Card.Img
+            onClick={() => navigate(`/catalog/${product.slug}`)}
+            variant="top"
+            src={getProductImage(product)}
+            alt={product.name}
+            className="product-img"
+            onError={(e) => {
+              e.target.src = '/placeholder.jpg';
+            }}
+          />
+          {product.discountedPrice < product.originalPrice && (
+            <div className="discount-badge">
+              {Math.round(100 - (product.discountedPrice / product.originalPrice) * 100)}% OFF
+            </div>
+          )}
+          <Badge 
+            bg={product.stock > 0 ? "success" : "danger"} 
+            className="stock-badge"
+          >
+            {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
+          </Badge>
+        </div>
+        <Card.Body className="d-flex flex-column">
+          <Card.Title className="product-title">{product.name}</Card.Title>
+          <Card.Text className="text-muted product-category">
+            {product.category || 'Uncategorized'}
+          </Card.Text>
+          <div className="mt-auto">
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <div className="price">
+                {product.discountedPrice < product.originalPrice && (
+                  <span className="original-price text-muted text-decoration-line-through me-2">
+                    ${product.originalPrice}
+                  </span>
+                )}
+                <span className="current-price fw-bold">
+                  ${product.discountedPrice || product.price}
+                </span>
+              </div>
+              <div className="rating">
+                <FaStar className="text-warning" />
+                <span className="ms-1">{product.rating}</span>
+              </div>
+            </div>
+            <button
+              className={`add-to-cart-btn w-100 mt-2 ${product.stock <= 0 ? 'disabled' : ''}`}
+              onClick={() => handleAddToCart(product)}
+              disabled={product.stock <= 0}
+            >
+              {product.stock > 0 ? (
+                <>
+                  <FaShoppingCart className="me-2" />
+                  Add to Cart
+                </>
+              ) : (
+                <>
+                  <FaBoxOpen className="me-2" />
+                  Out of Stock
+                </>
+              )}
+            </button>
+          </div>
+        </Card.Body>
+      </Card>
+    </Col>
+  );
+
   return (
-    <Container className="my-5 py-4">
-      {/* Header Section */}
-      <Row className="mb-4 text-center">
-        <Col>
-          <h1 className="display-5 fw-bold mb-3">Our Products</h1>
-          <p className="lead text-muted">Discover our premium products</p>
-        </Col>
-      </Row>
+    <Container className="tshirt-products-page py-3 py-md-5">
+      <div className="page-header-wrapper mb-4 mb-md-5">
+        <h1 className="page-header">Our Products</h1>
+      </div>
 
-      {/* Content Section */}
       {loading ? (
-        <Row className="justify-content-center my-5">
-          <Col xs="auto">
-            <Spinner animation="border" variant="primary" />
-            <p className="mt-3 text-center">Loading products...</p>
-          </Col>
-        </Row>
+        <div className="text-center my-5 py-5">
+          <Spinner animation="border" variant="primary" />
+          <p className="mt-3">Loading products...</p>
+        </div>
       ) : error ? (
-        <Row className="justify-content-center">
-          <Col md={8}>
-            <Alert variant="danger" className="text-center">{error}</Alert>
-          </Col>
-        </Row>
+        <Alert variant="danger" className="text-center">
+          {error}
+        </Alert>
       ) : (
-        <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-          {products.map(product => (
-            <Col key={product._id}>
-              <Card className="h-100 shadow-sm border-0 d-flex flex-column">
-                <div 
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => navigate(`/catalog/${product.slug}`)}
-                  className="flex-grow-1"
-                >
-                  <Card.Img
-                    variant="top"
-                    src={getProductImage(product)}
-                    alt={product.name}
-                    style={{ 
-                      height: '200px', 
-                      objectFit: 'cover',
-                      width: '100%'
-                    }}
-                    className="p-3"
-                    onError={e => { e.target.src = placeholderImg; }}
-                  />
-                  <Card.Body className="d-flex flex-column">
-                    <Stack direction="horizontal" gap={2} className="mb-1">
-                      <Card.Title className="mb-0 flex-grow-1">{product.name}</Card.Title>
-                      <Badge 
-                        bg={product.stock > 0 ? "success" : "danger"} 
-                        className="align-self-start"
-                      >
-                        {product.stock > 0 ? `In Stock ` : "Out of Stock"}
-                      </Badge>
-                    </Stack>
-                    <Badge bg="secondary" className="mb-2 align-self-start">
-                      {product.category}
-                    </Badge>
-
-                    <div className="mt-auto">
-                      {product.discountedPrice < product.originalPrice && (
-                        <Stack direction="horizontal" gap={2} className="mb-1">
-                          <span className="text-decoration-line-through text-muted small">
-                            {product.originalPrice} PKR
-                          </span>
-                          <Badge bg="danger" pill className="small">
-                            {Math.round(100 - (product.discountedPrice / product.originalPrice * 100))}% OFF
-                          </Badge>
-                        </Stack>
-                      )}
-                      
-                      <h5 className="mb-0 text-primary">{product.discountedPrice} PKR</h5>
-                    </div>
-                  </Card.Body>
-                </div>
-                <Card.Footer className="bg-white border-0 pt-0 pb-3">
-                  {product.stock > 0 ? (
-                    <Button 
-                      variant="primary" 
-                      className="w-100"
-                      onClick={e => {
-                        e.stopPropagation();
-                        handleAddToCart(product);
-                      }}
-                    >
-                      <FaShoppingCart className="me-2" />
-                      Add to Cart
-                    </Button>
-                  ) : (
-                    <Button 
-                      variant="secondary" 
-                      className="w-100"
-                      disabled
-                    >
-                      <FaBoxOpen className="me-2" />
-                      Out of Stock
-                    </Button>
-                  )}
-                </Card.Footer>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+        <>
+          {/* Mobile view - show 2 products per row */}
+          <div className="d-block d-md-none">
+            <Row xs={2} className="g-3">
+              {products.slice(0, 4).map(product => renderProductCard(product))}
+            </Row>
+          </div>
+          
+          {/* Tablet/Desktop view - show responsive columns */}
+          <div className="d-none d-md-block">
+            <Row xs={1} sm={2} md={3} lg={4} className="g-4">
+              {products.map(product => renderProductCard(product))}
+            </Row>
+          </div>
+        </>
       )}
     </Container>
   );

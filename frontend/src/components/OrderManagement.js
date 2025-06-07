@@ -11,7 +11,8 @@ import {
   Card,
   Spinner,
   Modal,
-  Dropdown
+  Dropdown,
+  Stack
 } from 'react-bootstrap';
 import { 
   FiRefreshCw, 
@@ -20,11 +21,13 @@ import {
   FiUser, 
   FiShoppingBag,
   FiDownload,
-  FiFileText
+  FiFileText,
+  FiChevronDown
 } from 'react-icons/fi';
 import * as XLSX from 'xlsx';
 import OrderDetailsModal from './OrderDetailsModal';
 import ExportOrders from './ExportOrders';
+import './heroSlider.css'; // Create this CSS file
 
 const OrderManagement = () => {
   const navigate = useNavigate();
@@ -35,6 +38,11 @@ const OrderManagement = () => {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [filteredCounts, setFilteredCounts] = useState({
+    all: 0,
+    delivery: 0,
+    completed: 0
+  });
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -74,6 +82,16 @@ const OrderManagement = () => {
       setLoading(true);
       const response = await axios.get('https://sublime-magic-production.up.railway.app/allOrder');
       setOrders(response.data);
+      
+      // Calculate counts for each tab
+      const deliveryCount = response.data.filter(order => order.status === 'out-for-delivery').length;
+      const completedCount = response.data.filter(order => order.status === 'completed').length;
+      
+      setFilteredCounts({
+        all: response.data.length,
+        delivery: deliveryCount,
+        completed: completedCount
+      });
     } catch (error) {
       console.error('Error fetching orders:', error);
     } finally {
@@ -105,9 +123,9 @@ const OrderManagement = () => {
 
   if (authLoading) {
     return (
-      <Container className="text-center py-5">
-        <Spinner animation="border" variant="light" />
-        <div className="mt-3 text-white">Checking authorization...</div>
+      <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
+        <Spinner animation="border" variant="primary" />
+        <span className="ms-3">Verifying access...</span>
       </Container>
     );
   }
@@ -116,130 +134,92 @@ const OrderManagement = () => {
     return null; // Redirect will happen in useEffect
   }
 
-  if (loading) {
-    return (
-      <Container className="text-center py-5">
-        <Spinner animation="border" variant="light" />
-        <div className="mt-3 text-white">Loading orders...</div>
-      </Container>
-    );
-  }
-
   return (
-    <Container className="py-5" style={{ minHeight: 'calc(100vh - 80px)' }}>
-      <Card 
-        className="border-0 shadow" 
-        style={{ 
-          background: 'linear-gradient(135deg, rgba(102,126,234,0.95) 0%, rgba(118,75,162,0.95) 100%)',
-          borderRadius: '15px',
-          overflow: 'hidden'
-        }}
-      >
+    <Container className="order-management-container py-4">
+      <Card className="border-0 shadow-lg">
+        <Card.Header className="bg-primary text-white py-3">
+          <Stack direction="horizontal" gap={3} className="justify-content-between align-items-center flex-wrap">
+            <h2 className="mb-0">
+              <FiShoppingBag className="me-2" />
+              Order Management
+            </h2>
+            <Stack direction="horizontal" gap={2}>
+              <ExportOrders orders={orders} />
+              <Button 
+                variant="light" 
+                onClick={fetchOrders}
+                disabled={loading}
+                className="d-flex align-items-center"
+              >
+                <FiRefreshCw className={`me-2 ${loading ? 'spin' : ''}`} />
+                {loading ? 'Refreshing...' : 'Refresh'}
+              </Button>
+            </Stack>
+          </Stack>
+        </Card.Header>
+        
         <Card.Body className="p-0">
-          <div className="p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-            <div className="d-flex justify-content-between align-items-center">
-              <h2 className="mb-0 text-white">Order Management</h2>
-              <div className="d-flex align-items-center" style={{ gap: '12px' }}>
-                <ExportOrders orders={orders} />
-                <Button 
-                  variant="light" 
-                  onClick={fetchOrders}
-                  className="d-flex align-items-center justify-content-center"
-                  style={{ 
-                    background: 'rgba(255,255,255,0.9)',
-                    color: '#667eea',
-                    fontWeight: 500,
-                    borderRadius: '8px',
-                    padding: '8px 16px',
-                    border: 'none',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                    transition: 'all 0.3s ease',
-                    minWidth: '110px',
-                    height: '38px'
-                  }}
-                >
-                  <FiRefreshCw className="me-2" /> Refresh
-                </Button>
-              </div>
-            </div>
-          </div>
-          
           <Tabs
             activeKey={activeTab}
             onSelect={(k) => setActiveTab(k)}
-            className="px-4 pt-3"
-            style={{ borderBottom: 'none' }}
+            className="px-3 pt-3 mb-0"
+            fill
           >
             <Tab 
               eventKey="all" 
               title={
-                <span className="d-flex align-items-center" style={{ 
-                  color: activeTab === 'all' ? 'black' : 'rgba(255,255,255,0.7)',
-                  fontWeight: activeTab === 'all' ? 600 : 400,
-                  padding: '0.5rem 0'
-                }}>
-                  All Orders
-                  {filteredOrders.all.length > 0 && (
-                    <Badge pill bg="light" text="dark" className="ms-2">
-                      {filteredOrders.all.length}
-                    </Badge>
-                  )}
-                </span>
+                <TabTitle 
+                  icon={null}
+                  text="All Orders"
+                  count={filteredCounts.all}
+                  active={activeTab === 'all'}
+                />
               }
             >
               <OrderTable 
                 orders={filteredOrders.all} 
                 onStatusUpdate={updateOrderStatus}
                 onViewDetails={viewOrderDetails}
-                showAll={true}
+                loading={loading}
+                emptyMessage="No orders found in the system"
               />
             </Tab>
             <Tab 
               eventKey="delivery" 
               title={
-                <span className="d-flex align-items-center" style={{ 
-                  color: activeTab === 'delivery' ? 'black' : 'rgba(255,255,255,0.7)',
-                  fontWeight: activeTab === 'delivery' ? 600 : 400,
-                  padding: '0.5rem 0'
-                }}>
-                  <FiTruck className="me-1" /> Delivery
-                  {filteredOrders.delivery.length > 0 && (
-                    <Badge pill bg="light" text="dark" className="ms-2">
-                      {filteredOrders.delivery.length}
-                    </Badge>
-                  )}
-                </span>
+                <TabTitle 
+                  icon={<FiTruck />}
+                  text="Delivery"
+                  count={filteredCounts.delivery}
+                  active={activeTab === 'delivery'}
+                />
               }
             >
               <OrderTable 
                 orders={filteredOrders.delivery} 
                 onStatusUpdate={updateOrderStatus}
                 onViewDetails={viewOrderDetails}
-                showAll={false}
+                loading={loading}
+                emptyMessage="No orders currently out for delivery"
               />
             </Tab>
             <Tab 
               eventKey="completed" 
               title={
-                <span className="d-flex align-items-center" style={{ 
-                  color: activeTab === 'completed' ? 'black' : 'rgba(255,255,255,0.7)',
-                  fontWeight: activeTab === 'completed' ? 600 : 400,
-                  padding: '0.5rem 0'
-                }}>
-                  <FiCheckCircle className="me-1" /> Completed
-                  {filteredOrders.completed.length > 0 && (
-                    <Badge pill bg="light" text="dark" className="ms-2">
-                      {filteredOrders.completed.length}
-                    </Badge>
-                  )}
-                </span>
+                <TabTitle 
+                  icon={<FiCheckCircle />}
+                  text="Completed"
+                  count={filteredCounts.completed}
+                  active={activeTab === 'completed'}
+                />
               }
             >
               <OrderTable 
                 orders={filteredOrders.completed} 
                 onStatusUpdate={updateOrderStatus}
                 onViewDetails={viewOrderDetails}
-                showAll={false}
+                loading={loading}
+                emptyMessage="No completed orders yet"
               />
             </Tab>
           </Tabs>
@@ -255,145 +235,153 @@ const OrderManagement = () => {
   );
 };
 
-const OrderTable = ({ orders, onStatusUpdate, onViewDetails, showAll }) => {
+const TabTitle = ({ icon, text, count, active }) => (
+  <span className="d-flex align-items-center justify-content-center">
+    {icon && React.cloneElement(icon, { className: `me-2 ${active ? 'text-primary' : 'text-muted'}` })}
+    <span className={active ? 'text-primary fw-bold' : 'text-muted'}>{text}</span>
+    {count > 0 && (
+      <Badge pill bg={active ? 'primary' : 'secondary'} className="ms-2">
+        {count}
+      </Badge>
+    )}
+  </span>
+);
+
+const OrderTable = ({ orders, onStatusUpdate, onViewDetails, loading, emptyMessage }) => {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'pending':
-        return <Badge bg="warning" text="dark" style={{ fontWeight: 500 }}>Pending</Badge>;
+        return <Badge bg="warning" text="dark">Pending</Badge>;
       case 'out-for-delivery':
-        return <Badge bg="primary" style={{ fontWeight: 500 }}>Out for Delivery</Badge>;
+        return <Badge bg="primary">Out for Delivery</Badge>;
       case 'completed':
-        return <Badge bg="success" style={{ fontWeight: 500 }}>Completed</Badge>;
+        return <Badge bg="success">Completed</Badge>;
       default:
-        return <Badge bg="secondary" style={{ fontWeight: 500 }}>{status}</Badge>;
+        return <Badge bg="secondary">{status}</Badge>;
     }
   };
 
-  return (
-    <div className="p-4">
-      <Table 
-        striped 
-        bordered 
-        hover 
-        responsive 
-        className="mb-0"
-        style={{ 
-          backgroundColor: 'rgba(255,255,255,0.95)',
-          borderRadius: '10px',
-          overflow: 'hidden'
-        }}
+  const StatusDropdown = ({ order }) => (
+    <Dropdown>
+      <Dropdown.Toggle 
+        variant="outline-primary" 
+        size="sm" 
+        id="dropdown-status"
+        className="d-flex align-items-center"
       >
-        <thead style={{ background: 'rgba(102,126,234,0.1)' }}>
-          <tr>
-            <th style={{ color: '#4f46e5', fontWeight: 600 }}>Order ID</th>
-            <th style={{ color: '#4f46e5', fontWeight: 600 }}>Customer</th>
-            <th style={{ color: '#4f46e5', fontWeight: 600 }}>Date</th>
-            <th style={{ color: '#4f46e5', fontWeight: 600 }}>Products</th>
-            <th style={{ color: '#4f46e5', fontWeight: 600 }}>Total</th>
-            <th style={{ color: '#4f46e5', fontWeight: 600 }}>Status</th>
-            <th style={{ color: '#4f46e5', fontWeight: 600 }}>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {orders.length === 0 ? (
-            <tr>
-              <td colSpan="7" className="text-center py-4" style={{ color: '#6b7280' }}>
-                No orders found
-              </td>
-            </tr>
-          ) : (
-            orders.map(order => (
-              <tr key={order._id}>
-                <td style={{ color: '#1f2937', fontWeight: 500 }}>
-                  <Button 
-                    variant="link" 
-                    onClick={() => onViewDetails(order)}
-                    style={{ 
-                      color: '#4f46e5',
-                      fontWeight: 500,
-                      padding: 0,
-                      textDecoration: 'underline'
-                    }}
-                  >
-                    {order._id.substring(0, 8)}...
-                  </Button>
-                </td>
-                <td style={{ color: '#1f2937', fontWeight: 500 }}>
-                  {order.customerName}
-                </td>
-                <td style={{ color: '#6b7280' }}>
-                  {new Date(order.orderDate).toLocaleDateString()}
-                </td>
-                <td>
-                  {order.products.slice(0, 2).map(p => (
-                    <div 
-                      key={p.productId} 
-                      style={{ color: '#1f2937', fontSize: '0.875rem' }}
-                    >
-                      {p.name} (x{p.quantity})
-                    </div>
-                  ))}
-                  {order.products.length > 2 && (
-                    <div style={{ color: '#6b7280', fontSize: '0.75rem' }}>
-                      +{order.products.length - 2} more items
-                    </div>
-                  )}
-                </td>
-                <td style={{ color: '#1f2937', fontWeight: 600 }}>
-                  ${order.totalAmount.toFixed(2)}
-                </td>
-                <td>
-                  {getStatusBadge(order.status)}
-                </td>
-                <td>
-                  {order.status === 'pending' && (
-                    <Button 
-                      variant="primary" 
-                      size="sm"
-                      onClick={() => onStatusUpdate(order._id, 'out-for-delivery')}
-                      style={{ 
-                        fontWeight: 500,
-                        borderRadius: '6px',
-                        padding: '0.25rem 0.75rem',
-                        marginBottom: '0.25rem'
-                      }}
-                    >
-                      Mark as Out for Delivery
-                    </Button>
-                  )}
-                  {order.status === 'out-for-delivery' && (
-                    <Button 
-                      variant="success" 
-                      size="sm"
-                      onClick={() => onStatusUpdate(order._id, 'completed')}
-                      style={{ 
-                        fontWeight: 500,
-                        borderRadius: '6px',
-                        padding: '0.25rem 0.75rem',
-                        marginBottom: '0.25rem'
-                      }}
-                    >
-                      Mark as Completed
-                    </Button>
-                  )}
-                  <Button
-                    variant="outline-secondary"
-                    size="sm"
-                    onClick={() => onViewDetails(order)}
-                    style={{ 
-                      fontWeight: 500,
-                      borderRadius: '6px',
-                      padding: '0.25rem 0.75rem'
-                    }}
-                  >
-                    View Details
-                  </Button>
-                </td>
+        Update Status <FiChevronDown className="ms-1" />
+      </Dropdown.Toggle>
+      <Dropdown.Menu>
+        {order.status !== 'out-for-delivery' && (
+          <Dropdown.Item 
+            onClick={() => onStatusUpdate(order._id, 'out-for-delivery')}
+          >
+            Mark as Out for Delivery
+          </Dropdown.Item>
+        )}
+        {order.status !== 'completed' && (
+          <Dropdown.Item 
+            onClick={() => onStatusUpdate(order._id, 'completed')}
+          >
+            Mark as Completed
+          </Dropdown.Item>
+        )}
+      </Dropdown.Menu>
+    </Dropdown>
+  );
+
+  return (
+    <div className="p-3">
+      {loading ? (
+        <div className="text-center py-5">
+          <Spinner animation="border" variant="primary" />
+          <div className="mt-3">Loading orders...</div>
+        </div>
+      ) : (
+        <div className="table-responsive">
+          <Table hover className="mb-0 align-middle">
+            <thead className="bg-light">
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Date</th>
+                <th>Products</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Actions</th>
               </tr>
-            ))
-          )}
-        </tbody>
-      </Table>
+            </thead>
+            <tbody>
+              {orders.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="text-center py-5 text-muted">
+                    {emptyMessage}
+                  </td>
+                </tr>
+              ) : (
+                orders.map(order => (
+                  <tr key={order._id}>
+                    <td>
+                      <Button 
+                        variant="link" 
+                        onClick={() => onViewDetails(order)}
+                        className="p-0 text-primary text-decoration-underline"
+                      >
+                        #{order._id.substring(0, 8)}...
+                      </Button>
+                    </td>
+                    <td>
+                      <div className="d-flex align-items-center">
+                        <FiUser className="me-2 text-muted" />
+                        {order.customerName}
+                      </div>
+                    </td>
+                    <td>
+                      {new Date(order.orderDate).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </td>
+                    <td>
+                      <div className="d-flex flex-column">
+                        {order.products.slice(0, 2).map(p => (
+                          <span key={p.productId} className="text-truncate">
+                            {p.name} (×{p.quantity})
+                          </span>
+                        ))}
+                        {order.products.length > 2 && (
+                          <small className="text-muted">
+                            +{order.products.length - 2} more
+                          </small>
+                        )}
+                      </div>
+                    </td>
+                    <td className="fw-bold">
+                      ${order.totalAmount.toFixed(2)}
+                    </td>
+                    <td>
+                      {getStatusBadge(order.status)}
+                    </td>
+                    <td>
+                      <Stack direction="horizontal" gap={2} className="flex-wrap">
+                        <StatusDropdown order={order} />
+                        <Button
+                          variant="outline-secondary"
+                          size="sm"
+                          onClick={() => onViewDetails(order)}
+                        >
+                          Details
+                        </Button>
+                      </Stack>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </Table>
+        </div>
+      )}
     </div>
   );
 };

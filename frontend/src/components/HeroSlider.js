@@ -20,7 +20,7 @@ const HeroSlider = () => {
       title: 'Winter Specials',
       subtitle: 'Up to 50% off selected items',
       ctaText: 'View Offers',
-      ctaLink: '/category/winter'
+      ctaLink: '/catalog'
     },
     {
       image: hero3,
@@ -31,11 +31,11 @@ const HeroSlider = () => {
     }
   ];
 
-  // Auto-advance slides every 3 seconds
+  // Auto-advance slides every 5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       goToNext();
-    }, 3000);
+    }, 5000);
     return () => clearInterval(interval);
   }, [currentSlide]);
 
@@ -49,9 +49,13 @@ const HeroSlider = () => {
 
   return (
     <div className="hero-slider">
-      {/* Previous arrow button with HTML entity */}
-      <button className="slider-arrow prev-arrow" onClick={goToPrev} aria-label="Previous slide">
-        &#10094; {/* Left arrow HTML entity */}
+      {/* Previous arrow button */}
+      <button 
+        className="slider-arrow prev-arrow" 
+        onClick={goToPrev} 
+        aria-label="Previous slide"
+      >
+        &#10094;
       </button>
       
       {/* Slides */}
@@ -69,9 +73,13 @@ const HeroSlider = () => {
         </div>
       ))}
       
-      {/* Next arrow button with HTML entity */}
-      <button className="slider-arrow next-arrow" onClick={goToNext} aria-label="Next slide">
-        &#10095; {/* Right arrow HTML entity */}
+      {/* Next arrow button */}
+      <button 
+        className="slider-arrow next-arrow" 
+        onClick={goToNext} 
+        aria-label="Next slide"
+      >
+        &#10095;
       </button>
       
       {/* Dots indicator */}

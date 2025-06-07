@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { 
   Container, 
@@ -12,8 +12,9 @@ import {
   Badge,
   Stack
 } from 'react-bootstrap';
-import { FaShoppingCart, FaBoxOpen, FaCalendarAlt } from 'react-icons/fa';
+import { FaShoppingCart, FaBoxOpen, FaCalendarAlt, FaStar } from 'react-icons/fa';
 import { CartContext } from '../components/CartContext';
+import './heroSlider.css'; // Create this CSS file
 
 const NewArrivals = () => {
   const [products, setProducts] = useState([]);
@@ -28,8 +29,8 @@ const NewArrivals = () => {
         const response = await axios.get('https://sublime-magic-production.up.railway.app/new-arrival');
         setProducts(response.data.map(product => ({
           ...product,
-          // Use actual stock value if provided, otherwise default to random stock (5-20)
-          stock: product.stock !== undefined ? product.stock : Math.floor(Math.random() * 16) + 5
+          stock: product.stock !== undefined ? product.stock : Math.floor(Math.random() * 16) + 5,
+          rating: product.rating || (Math.random() * 1 + 4).toFixed(1) // Default rating 4.0-5.0
         })));
       } catch (err) {
         setError(err.response?.data?.error || 'Failed to load new arrivals');
@@ -41,9 +42,7 @@ const NewArrivals = () => {
     fetchNewArrivals();
   }, []);
 
-  const handleAddToCart = (product, e) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleAddToCart = (product) => {
     if (product.stock > 0) {
       addToCart({ 
         ...product, 
@@ -52,119 +51,154 @@ const NewArrivals = () => {
     }
   };
 
-  return (
-    <Container className="my-5 py-4">
-      {/* Header Section */}
-      <Row className="mb-4 text-center">
-        <Col>
-          <h1 className="display-5 fw-bold mb-3">
-            <FaCalendarAlt className="me-2 text-primary" />
-            New Arrivals
-          </h1>
-          <p className="lead text-muted">
-            Discover our latest products added in the last 30 days
-          </p>
-        </Col>
-      </Row>
+  const getProductImage = (product) => {
+    if (!product?.image?.[0]) return '/placeholder.jpg';
+    if (product.image[0].startsWith('http')) return product.image[0];
+    return `https://sublime-magic-production.up.railway.app${product.image[0]}`;
+  };
 
-      {/* Content Section */}
+  return (
+    <Container className="new-arrivals-container py-4">
+      <div className="page-header-wrapper mb-4 mb-md-5 text-center">
+        <h1 className="page-header">
+          <FaCalendarAlt className="me-2" />
+          New Arrivals
+        </h1>
+        <div className="header-decoration mx-auto"></div>
+        <p className="lead text-muted mt-3">
+          Discover our latest products added in the last 30 days
+        </p>
+      </div>
+
       {loading ? (
-        <Row className="justify-content-center my-5">
-          <Col xs="auto">
-            <Spinner animation="border" variant="primary" />
-            <p className="mt-3 text-center">Loading new arrivals...</p>
-          </Col>
-        </Row>
+        <div className="text-center my-5 py-5">
+          <Spinner animation="border" variant="primary" />
+          <p className="mt-3">Loading new arrivals...</p>
+        </div>
       ) : error ? (
-        <Row className="justify-content-center">
-          <Col md={8}>
-            <Alert variant="danger" className="text-center">
-              {error}
-            </Alert>
-          </Col>
-        </Row>
+        <Alert variant="danger" className="text-center">
+          {error}
+        </Alert>
       ) : products.length === 0 ? (
-        <Row className="justify-content-center">
-          <Col md={8}>
-            <Alert variant="info" className="text-center">
-              No new arrivals found in the last 30 days
-            </Alert>
-          </Col>
-        </Row>
+        <Alert variant="info" className="text-center">
+          No new arrivals found in the last 30 days
+        </Alert>
       ) : (
-        <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-          {products.map((product) => (
-            <Col key={product._id}>
-              <Card className="h-100 shadow-sm border-0 d-flex flex-column">
-                <div 
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => navigate(`/catalog/${product.slug}`)}
-                  className="flex-grow-1"
-                >
-                  <Card.Img
-                    variant="top"
-                    src={`https://sublime-magic-production.up.railway.app${product.image?.[0] || '/placeholder.jpg'}`}
-                    alt={product.name}
-                    style={{ height: '200px', objectFit: 'cover' }}
-                    className="p-3"
-                  />
-                  <Card.Body className="d-flex flex-column">
-                    <Stack direction="horizontal" gap={2} className="mb-1">
-                      <Card.Title className="mb-0 flex-grow-1">{product.name}</Card.Title>
-                      <Badge 
-                        bg={product.stock > 0 ? "success" : "danger"} 
-                        className="align-self-start"
-                      >
-                        {product.stock > 0 ? `In Stock` : "Out of Stock"}
-                      </Badge>
-                    </Stack>
-                    <Badge bg="secondary" className="mb-2 align-self-start">
-                      {product.category}
-                    </Badge>
-                    
-                    <div className="mt-auto">
-                      {product.discountedPrice < product.originalPrice && (
-                        <Stack direction="horizontal" gap={2} className="mb-1">
-                          <span className="text-decoration-line-through text-muted">
-                            ${product.originalPrice}
-                          </span>
-                          <Badge bg="danger" pill>
-                            {Math.round(100 - (product.discountedPrice / product.originalPrice * 100))}% OFF
-                          </Badge>
-                        </Stack>
-                      )}
-                      
-                      <h5 className="mb-0 text-primary">${product.discountedPrice}</h5>
-                    </div>
-                  </Card.Body>
-                </div>
-                <Card.Footer className="bg-white border-0 pt-0">
-                  {product.stock > 0 ? (
-                    <Button 
-                      variant="primary" 
-                      className="w-100"
-                      onClick={(e) => handleAddToCart(product, e)}
-                    >
-                      <FaShoppingCart className="me-2" />
-                      Add to Cart
-                    </Button>
-                  ) : (
-                    <Button 
-                      variant="secondary" 
-                      className="w-100"
-                      disabled
-                    >
-                      <FaBoxOpen className="me-2" />
-                      Out of Stock
-                    </Button>
-                  )}
-                </Card.Footer>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+        <>
+          {/* Mobile view - 2 products per row */}
+          <div className="d-block d-md-none">
+            <Row xs={2} className="g-3">
+              {products.map(product => (
+                <ProductCard 
+                  key={product._id} 
+                  product={product} 
+                  onAddToCart={handleAddToCart}
+                  onViewDetails={() => navigate(`/catalog/${product.slug}`)}
+                />
+              ))}
+            </Row>
+          </div>
+          
+          {/* Tablet/Desktop view - responsive columns */}
+          <div className="d-none d-md-block">
+            <Row xs={1} sm={2} md={3} lg={4} className="g-4">
+              {products.map(product => (
+                <ProductCard 
+                  key={product._id} 
+                  product={product} 
+                  onAddToCart={handleAddToCart}
+                  onViewDetails={() => navigate(`/catalog/${product.slug}`)}
+                />
+              ))}
+            </Row>
+          </div>
+        </>
       )}
     </Container>
+  );
+};
+
+const ProductCard = ({ product, onAddToCart, onViewDetails }) => {
+  const getProductImage = (product) => {
+    if (!product?.image?.[0]) return '/placeholder.jpg';
+    if (product.image[0].startsWith('http')) return product.image[0];
+    return `https://sublime-magic-production.up.railway.app${product.image[0]}`;
+  };
+
+  return (
+    <Col>
+      <Card className="product-card h-100 border-0 shadow-sm">
+        <div className="product-image-container">
+          <Card.Img
+            variant="top"
+            src={getProductImage(product)}
+            alt={product.name}
+            onClick={onViewDetails}
+            className="product-img"
+            onError={(e) => {
+              e.target.src = '/placeholder.jpg';
+            }}
+          />
+          {product.discountedPrice < product.originalPrice && (
+            <div className="discount-badge">
+              {Math.round(100 - (product.discountedPrice / product.originalPrice * 100))}% OFF
+            </div>
+          )}
+          <Badge 
+            bg={product.stock > 0 ? "success" : "danger"} 
+            className="stock-badge"
+          >
+            {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
+          </Badge>
+        </div>
+        <Card.Body className="d-flex flex-column">
+          <Card.Title className="product-title" onClick={onViewDetails}>
+            {product.name}
+          </Card.Title>
+          <Card.Text className="text-muted product-category">
+            {product.category || 'Uncategorized'}
+          </Card.Text>
+          <div className="mt-auto">
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <div className="price">
+                {product.discountedPrice < product.originalPrice && (
+                  <span className="original-price text-muted text-decoration-line-through me-2">
+                    ${product.originalPrice}
+                  </span>
+                )}
+                <span className="current-price fw-bold">
+                  ${product.discountedPrice}
+                </span>
+              </div>
+              <div className="rating">
+                <FaStar className="text-warning" />
+                <span className="ms-1">{product.rating}</span>
+              </div>
+            </div>
+            <button
+              className={`add-to-cart-btn w-100 mt-2 ${product.stock <= 0 ? 'disabled' : ''}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddToCart(product);
+              }}
+              disabled={product.stock <= 0}
+            >
+              {product.stock > 0 ? (
+                <>
+                  <FaShoppingCart className="me-2" />
+                  Add to Cart
+                </>
+              ) : (
+                <>
+                  <FaBoxOpen className="me-2" />
+                  Out of Stock
+                </>
+              )}
+            </button>
+          </div>
+        </Card.Body>
+      </Card>
+    </Col>
   );
 };
 

@@ -1,4 +1,3 @@
-// src/components/Footer.js
 import React from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { FaFacebook, FaInstagram, FaTwitter, FaEnvelope, FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
@@ -9,20 +8,8 @@ export default function Footer() {
     <footer className="site-footer">
       <Container>
         <Row>
-          <Col md={4} className="footer-col">
-            <h5 className="footer-heading">About Us</h5>
-            <p className="footer-text">
-              Elevate your style with our premium clothing collection. 
-              We offer high-quality apparel that combines comfort and fashion.
-            </p>
-            <div className="social-icons">
-              <a href="https://facebook.com" aria-label="Facebook"><FaFacebook /></a>
-              <a href="https://instagram.com" aria-label="Instagram"><FaInstagram /></a>
-              <a href="https://twitter.com" aria-label="Twitter"><FaTwitter /></a>
-            </div>
-          </Col>
-
-          <Col md={4} className="footer-col">
+          {/* Quick Links Column - Left on mobile */}
+          <Col xs={6} md={6} className="footer-col">
             <h5 className="footer-heading">Quick Links</h5>
             <ul className="footer-links">
               <li><a href="/">Home</a></li>
@@ -34,7 +21,8 @@ export default function Footer() {
             </ul>
           </Col>
 
-          <Col md={4} className="footer-col">
+          {/* Contact Info Column - Right on mobile */}
+          <Col xs={6} md={6} className="footer-col">
             <h5 className="footer-heading">Contact Info</h5>
             <ul className="contact-info">
               <li>
@@ -50,6 +38,13 @@ export default function Footer() {
                 <span>info@rovairfashion.com</span>
               </li>
             </ul>
+            
+            {/* Social Icons moved here */}
+            <div className="social-icons">
+              <a href="https://facebook.com" aria-label="Facebook"><FaFacebook /></a>
+              <a href="https://instagram.com" aria-label="Instagram"><FaInstagram /></a>
+              <a href="https://twitter.com" aria-label="Twitter"><FaTwitter /></a>
+            </div>
           </Col>
         </Row>
 
