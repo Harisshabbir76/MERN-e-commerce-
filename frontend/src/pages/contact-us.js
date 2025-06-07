@@ -137,9 +137,10 @@ const ContactUs = () => {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                placeholder="Your Name"
+                placeholder=" "
                 className="form-input py-3 ps-5"
               />
+              <label>Your Name</label>
             </Form.Group>
 
             <Form.Group controlId="email" className="mb-4 form-group">
