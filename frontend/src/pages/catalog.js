@@ -14,7 +14,7 @@ import {
 } from 'react-bootstrap';
 import { FaShoppingCart, FaBoxOpen, FaStar } from 'react-icons/fa';
 import { CartContext } from '../components/CartContext';
-import './App.css';
+import '../App.css';
 
 export default function Catalog() {
   const [products, setProducts] = useState([]);

@@ -3,7 +3,7 @@ import axios from "axios";
 import { Container, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { FaPaperPlane, FaUser, FaEnvelope, FaTag, FaComment, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import Popup from '../components/popup';
-import './App.css';
+import '../App.css';
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
