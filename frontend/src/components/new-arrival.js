@@ -14,12 +14,15 @@ import {
 } from 'react-bootstrap';
 import { FaShoppingCart, FaBoxOpen, FaCalendarAlt, FaStar } from 'react-icons/fa';
 import { CartContext } from '../components/CartContext';
-import './heroSlider.css'; // Create this CSS file
+import FilterComponent from '../components/FilterComponent';
+import './heroSlider.css';
 
 const NewArrivals = () => {
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sortOption, setSortOption] = useState('default');
   const { addToCart } = useContext(CartContext);
   const navigate = useNavigate();
 
@@ -27,11 +30,13 @@ const NewArrivals = () => {
     const fetchNewArrivals = async () => {
       try {
         const response = await axios.get('https://sublime-magic-production.up.railway.app/new-arrival');
-        setProducts(response.data.map(product => ({
+        const productsWithDefaults = response.data.map(product => ({
           ...product,
           stock: product.stock !== undefined ? product.stock : Math.floor(Math.random() * 16) + 5,
-          rating: product.rating || (Math.random() * 1 + 4).toFixed(1) // Default rating 4.0-5.0
-        })));
+          rating: product.rating || (Math.random() * 1 + 4).toFixed(1)
+        }));
+        setProducts(productsWithDefaults);
+        setFilteredProducts(productsWithDefaults);
       } catch (err) {
         setError(err.response?.data?.error || 'Failed to load new arrivals');
       } finally {
@@ -41,6 +46,33 @@ const NewArrivals = () => {
 
     fetchNewArrivals();
   }, []);
+
+  useEffect(() => {
+    const sortProducts = () => {
+      let sorted = [...products];
+      
+      switch (sortOption) {
+        case 'price-high-low':
+          sorted.sort((a, b) => b.discountedPrice - a.discountedPrice);
+          break;
+        case 'price-low-high':
+          sorted.sort((a, b) => a.discountedPrice - b.discountedPrice);
+          break;
+        case 'rating-high':
+          sorted.sort((a, b) => b.rating - a.rating);
+          break;
+        case 'newest':
+          sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          break;
+        default:
+          break;
+      }
+      
+      setFilteredProducts(sorted);
+    };
+
+    sortProducts();
+  }, [sortOption, products]);
 
   const handleAddToCart = (product) => {
     if (product.stock > 0) {
@@ -70,6 +102,11 @@ const NewArrivals = () => {
         </p>
       </div>
 
+      <FilterComponent 
+        sortOption={sortOption} 
+        onSortChange={setSortOption} 
+      />
+
       {loading ? (
         <div className="text-center my-5 py-5">
           <Spinner animation="border" variant="primary" />
@@ -79,16 +116,15 @@ const NewArrivals = () => {
         <Alert variant="danger" className="text-center">
           {error}
         </Alert>
-      ) : products.length === 0 ? (
+      ) : filteredProducts.length === 0 ? (
         <Alert variant="info" className="text-center">
           No new arrivals found in the last 30 days
         </Alert>
       ) : (
         <>
-          {/* Mobile view - 2 products per row */}
           <div className="d-block d-md-none">
             <Row xs={2} className="g-3">
-              {products.map(product => (
+              {filteredProducts.map(product => (
                 <ProductCard 
                   key={product._id} 
                   product={product} 
@@ -99,10 +135,9 @@ const NewArrivals = () => {
             </Row>
           </div>
           
-          {/* Tablet/Desktop view - responsive columns */}
           <div className="d-none d-md-block">
             <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-              {products.map(product => (
+              {filteredProducts.map(product => (
                 <ProductCard 
                   key={product._id} 
                   product={product} 
