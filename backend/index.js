@@ -525,7 +525,7 @@ app.post('/api/reviews', async (req, res) => {
 
 
 
-router.put('/update/:id', async (req, res) => {
+app.put('/update/:id', async (req, res) => {
   try {
     const product = await Product.findByIdAndUpdate(
       req.params.id,
@@ -542,7 +542,7 @@ router.put('/update/:id', async (req, res) => {
 });
 
 // DELETE /admin/products/:id - Delete product
-router.delete('delete/:id', async (req, res) => {
+app.delete('delete/:id', async (req, res) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) {
