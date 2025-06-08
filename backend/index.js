@@ -545,7 +545,7 @@ app.put('/update/:id', async (req, res) => {
 });
 
 // DELETE /admin/products/:id - Delete product
-app.delete('delete/:id', async (req, res) => {
+app.delete('/delete/:id', async (req, res) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) {
