@@ -14,7 +14,7 @@ import {
 } from 'react-bootstrap';
 import { FaShoppingCart, FaBoxOpen, FaCalendarAlt, FaStar } from 'react-icons/fa';
 import { CartContext } from '../components/CartContext';
-import FilterComponent from '../components/FilterComponent';
+import FilterComponent from './Filter';
 import './heroSlider.css';
 
 const NewArrivals = () => {
