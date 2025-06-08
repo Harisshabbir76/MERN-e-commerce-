@@ -85,6 +85,16 @@ export default function Dashboard() {
                 >
                     Customer Messages
                 </Button>
+
+                <Button 
+                    variant="info" 
+                    size="lg"
+                    onClick={() => navigate('/dashboard/catalog')}
+                    className="p-4"
+                >
+                    Products
+                </Button>
+
             </div>
         </Container>
     );

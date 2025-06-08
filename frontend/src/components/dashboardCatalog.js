@@ -16,7 +16,7 @@ import { FaEdit, FaTrash, FaStar } from 'react-icons/fa';
 import CategoryTabs from '../components/CategoryTabs';
 import ProductEditModal from '../components/ProductEditModal';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
-import '../App.css';
+import './heroSlider.css';
 
 export default function AdminProductsDashboard() {
   const [products, setProducts] = useState([]);
@@ -33,7 +33,6 @@ export default function AdminProductsDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch products and categories in parallel
         const [productsRes, categoriesRes] = await Promise.all([
           axios.get('https://sublime-magic-production.up.railway.app/catalog', {
             headers: {
@@ -47,7 +46,6 @@ export default function AdminProductsDashboard() {
           })
         ]);
 
-        // Process products data
         const productsData = productsRes.data;
         let products = [];
 
@@ -58,7 +56,7 @@ export default function AdminProductsDashboard() {
         } else if (productsData && Array.isArray(productsData.products)) {
           products = productsData.products;
         } else {
-          throw new Error('Unexpected API response: expected an array of products');
+          throw new Error('Unexpected API response');
         }
 
         const processedProducts = products.map(product => ({
@@ -149,7 +147,6 @@ export default function AdminProductsDashboard() {
     );
     setProducts(updatedProducts);
     
-    // Also update filtered products if needed
     if (activeCategory === 'all' || updatedProduct.category === activeCategory) {
       setFilteredProducts(updatedProducts.filter(p => 
         activeCategory === 'all' || p.category === activeCategory
@@ -160,8 +157,8 @@ export default function AdminProductsDashboard() {
   };
 
   const renderProductCard = (product) => (
-    <Col key={product._id || product.id} xs={12} sm={6} md={4} lg={3}>
-      <Card className="product-card h-100 border-0 shadow-sm">
+    <Col key={product._id || product.id} xs={6} sm={6} md={4} lg={3}>
+      <Card className="product-card h-100 border-0 shadow-sm mb-3">
         <div className="product-image-container">
           <Card.Img
             variant="top"
@@ -217,12 +214,14 @@ export default function AdminProductsDashboard() {
               <Button 
                 variant="outline-primary" 
                 onClick={() => handleEdit(product)}
+                size="sm"
               >
                 <FaEdit /> Edit
               </Button>
               <Button 
                 variant="outline-danger" 
                 onClick={() => handleDelete(product)}
+                size="sm"
               >
                 <FaTrash /> Delete
               </Button>
@@ -258,7 +257,7 @@ export default function AdminProductsDashboard() {
         </div>
       ) : (
         <>
-          <Row className="g-4">
+          <Row className="g-2 g-md-4">
             {filteredProducts.length > 0 ? (
               filteredProducts.map(product => renderProductCard(product))
             ) : (
