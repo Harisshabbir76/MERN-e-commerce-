@@ -96,7 +96,7 @@ const NewArrivals = () => {
           <FaCalendarAlt className="me-2" />
           New Arrivals
         </h1>
-        <div className="header-decoration mx-auto"></div>
+        
         <p className="lead text-muted mt-3">
           Discover our latest products added in the last 30 days
         </p>
