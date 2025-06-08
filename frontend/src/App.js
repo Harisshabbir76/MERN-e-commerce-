@@ -23,7 +23,7 @@ import NotFoundPage from './components/404'
 import Logout from './components/Logout'
 import OrderManagement from "./components/OrderManagement"; 
 import DashboardContactUs from './components/contact-us'
-import Dashboard from './components/dashboardCatalog'
+import DashboardCatalog from './components/dashboardCatalog'
 
 function App() {
   return (
@@ -50,7 +50,7 @@ function App() {
           <Route path="/logout" element={<Logout />} />
           <Route path="/dashboard/order-management" element={<OrderManagement />} />
           <Route path="/dashboard/contactus" element={<DashboardContactUs />} />
-          <Route path="/dashboard/catalog" element={<DashboardContactUs />} />
+          <Route path="/dashboard/catalog" element={<DashboardCatalog />} />
            <Route path="*" element={<Navigate to="/404" />} />
 
         </Routes>
