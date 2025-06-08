@@ -17,15 +17,6 @@ const nodemailer = require('nodemailer');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-const corsOptions = {
-  origin: [
-    'https://mern-e-commerce-brown.vercel.app',
-    'http://localhost:3000'
-  ],
-  credentials: true
-};
-app.use(cors(corsOptions));
 
 // Memory monitoring
 setInterval(() => {
@@ -65,6 +56,18 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 app.use(express.json());
+
+const corsOptions = {
+  origin: [
+    'https://mern-e-commerce-brown.vercel.app',
+    'http://localhost:3000'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 
 // MongoDB Connection
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://harrishere:Haris123@tododb.qyf9c.mongodb.net/clothingweb?retryWrites=true&w=majority&appName=Tododb';
