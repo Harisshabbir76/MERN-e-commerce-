@@ -126,7 +126,7 @@ export default function AdminProductsDashboard() {
   const confirmDelete = async () => {
     try {
       await axios.delete(
-        `https://sublime-magic-production.up.railway.app/admin/delete/${selectedProduct._id}`,
+        `https://sublime-magic-production.up.railway.app/delete/${selectedProduct._id}`,
         {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
