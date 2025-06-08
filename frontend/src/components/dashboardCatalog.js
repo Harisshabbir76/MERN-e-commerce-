@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { 
@@ -13,7 +13,7 @@ import {
   ButtonGroup
 } from 'react-bootstrap';
 import { FaEdit, FaTrash, FaStar } from 'react-icons/fa';
-import FilterComponent from '../components/Filter';
+import CategoryTabs from '../components/CategoryTabs';
 import ProductEditModal from '../components/ProductEditModal';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import '../App.css';
@@ -23,30 +23,40 @@ export default function AdminProductsDashboard() {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [sortOption, setSortOption] = useState('default');
+  const [categories, setCategories] = useState([]);
+  const [activeCategory, setActiveCategory] = useState('all');
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       try {
-        const res = await axios.get('https://sublime-magic-production.up.railway.app/catalog', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-          }
-        });
-        const data = res.data;
+        // Fetch products and categories in parallel
+        const [productsRes, categoriesRes] = await Promise.all([
+          axios.get('https://sublime-magic-production.up.railway.app/catalog', {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            }
+          }),
+          axios.get('https://sublime-magic-production.up.railway.app/categories', {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            }
+          })
+        ]);
 
+        // Process products data
+        const productsData = productsRes.data;
         let products = [];
 
-        if (Array.isArray(data)) {
-          products = data;
-        } else if (data && Array.isArray(data.data)) {
-          products = data.data;
-        } else if (data && Array.isArray(data.products)) {
-          products = data.products;
+        if (Array.isArray(productsData)) {
+          products = productsData;
+        } else if (productsData && Array.isArray(productsData.data)) {
+          products = productsData.data;
+        } else if (productsData && Array.isArray(productsData.products)) {
+          products = productsData.products;
         } else {
           throw new Error('Unexpected API response: expected an array of products');
         }
@@ -62,44 +72,41 @@ export default function AdminProductsDashboard() {
 
         setProducts(processedProducts);
         setFilteredProducts(processedProducts);
+        setCategories(categoriesRes.data || []);
       } catch (err) {
-        setError(err.response?.data?.message || err.message || 'Failed to load products');
-        console.error('Fetch products error:', err);
+        setError(err.response?.data?.message || err.message || 'Failed to load data');
+        console.error('Fetch error:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProducts();
+    fetchData();
   }, []);
 
-  useEffect(() => {
-    if (products.length === 0) return;
+  const handleCategoryChange = async (category) => {
+    setActiveCategory(category);
+    setLoading(true);
 
-    let sortedProducts = [...products];
-
-    switch (sortOption) {
-      case 'price-high-low':
-        sortedProducts.sort((a, b) => b.price - a.price);
-        break;
-      case 'price-low-high':
-        sortedProducts.sort((a, b) => a.price - b.price);
-        break;
-      case 'rating-high':
-        sortedProducts.sort((a, b) => b.rating - a.rating);
-        break;
-      case 'newest':
-        sortedProducts.sort((a, b) => b.createdAt - a.createdAt);
-        break;
-      default:
-        break;
+    try {
+      if (category === 'all') {
+        setFilteredProducts(products);
+      } else {
+        const res = await axios.get(
+          `https://sublime-magic-production.up.railway.app/category/${category}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            }
+          }
+        );
+        setFilteredProducts(res.data);
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to filter products');
+    } finally {
+      setLoading(false);
     }
-
-    setFilteredProducts(sortedProducts);
-  }, [sortOption, products]);
-
-  const handleSortChange = (option) => {
-    setSortOption(option);
   };
 
   const getProductImage = (product) => {
@@ -129,6 +136,7 @@ export default function AdminProductsDashboard() {
         }
       );
       setProducts(products.filter(p => p._id !== selectedProduct._id));
+      setFilteredProducts(filteredProducts.filter(p => p._id !== selectedProduct._id));
       setShowDeleteModal(false);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to delete product');
@@ -136,14 +144,23 @@ export default function AdminProductsDashboard() {
   };
 
   const handleSave = (updatedProduct) => {
-    setProducts(products.map(p => 
+    const updatedProducts = products.map(p => 
       p._id === updatedProduct._id ? updatedProduct : p
-    ));
+    );
+    setProducts(updatedProducts);
+    
+    // Also update filtered products if needed
+    if (activeCategory === 'all' || updatedProduct.category === activeCategory) {
+      setFilteredProducts(updatedProducts.filter(p => 
+        activeCategory === 'all' || p.category === activeCategory
+      ));
+    }
+    
     setShowEditModal(false);
   };
 
   const renderProductCard = (product) => (
-    <Col key={product._id || product.id}>
+    <Col key={product._id || product.id} xs={12} sm={6} md={4} lg={3}>
       <Card className="product-card h-100 border-0 shadow-sm">
         <div className="product-image-container">
           <Card.Img
@@ -221,9 +238,10 @@ export default function AdminProductsDashboard() {
       <div className="page-header-wrapper mb-4 mb-md-5">
         <h1 className="page-header">Products Management</h1>
         
-        <FilterComponent 
-          sortOption={sortOption} 
-          onSortChange={handleSortChange} 
+        <CategoryTabs 
+          categories={categories} 
+          activeCategory={activeCategory}
+          onCategoryChange={handleCategoryChange}
         />
       </div>
 
@@ -240,8 +258,16 @@ export default function AdminProductsDashboard() {
         </div>
       ) : (
         <>
-          <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-            {filteredProducts.map(product => renderProductCard(product))}
+          <Row className="g-4">
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map(product => renderProductCard(product))
+            ) : (
+              <Col className="text-center py-5">
+                <Alert variant="info">
+                  No products found in this category
+                </Alert>
+              </Col>
+            )}
           </Row>
 
           <ProductEditModal
