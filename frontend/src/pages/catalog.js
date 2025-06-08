@@ -8,18 +8,19 @@ import {
   Card, 
   Spinner, 
   Alert,
-  Button,
-  Badge,
-  Stack
+  Badge
 } from 'react-bootstrap';
 import { FaShoppingCart, FaBoxOpen, FaStar } from 'react-icons/fa';
 import { CartContext } from '../components/CartContext';
+import FilterComponent from '../components/Filter';
 import '../App.css';
 
 export default function Catalog() {
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sortOption, setSortOption] = useState('default');
   const { addToCart } = useContext(CartContext);
   const navigate = useNavigate();
 
@@ -41,13 +42,20 @@ export default function Catalog() {
           throw new Error('Unexpected API response: expected an array of products');
         }
 
-        setProducts(products.map(product => ({
+        const processedProducts = products.map(product => ({
           ...product,
-          stock: product.stock !== undefined ? product.stock : Math.floor(Math.random() * 16) + 5,
-          rating: product.rating || (Math.random() * 1 + 4).toFixed(1) // Default rating 4.0-5.0
-        })));
+          stock: product.stock !== undefined ? product.stock : 0,
+          rating: product.averageRating || 0,
+          reviewCount: product.reviewCount || 0,
+          price: product.discountedPrice || product.price || 0,
+          createdAt: product.createdAt ? new Date(product.createdAt) : new Date()
+        }));
+
+        setProducts(processedProducts);
+        setFilteredProducts(processedProducts);
       } catch (err) {
-        setError(err.message || 'Failed to load products');
+        setError(err.response?.data?.message || err.message || 'Failed to load products');
+        console.error('Fetch products error:', err);
       } finally {
         setLoading(false);
       }
@@ -55,6 +63,36 @@ export default function Catalog() {
 
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+    if (products.length === 0) return;
+
+    let sortedProducts = [...products];
+
+    switch (sortOption) {
+      case 'price-high-low':
+        sortedProducts.sort((a, b) => b.price - a.price);
+        break;
+      case 'price-low-high':
+        sortedProducts.sort((a, b) => a.price - b.price);
+        break;
+      case 'rating-high':
+        sortedProducts.sort((a, b) => b.rating - a.rating);
+        break;
+      case 'newest':
+        sortedProducts.sort((a, b) => b.createdAt - a.createdAt);
+        break;
+      default:
+        // Default sorting (original order)
+        break;
+    }
+
+    setFilteredProducts(sortedProducts);
+  }, [sortOption, products]);
+
+  const handleSortChange = (option) => {
+    setSortOption(option);
+  };
 
   const getProductImage = (product) => {
     if (!product?.image?.[0]) return '/placeholder.jpg';
@@ -71,7 +109,6 @@ export default function Catalog() {
     }
   };
 
-  // Function to render product card
   const renderProductCard = (product) => (
     <Col key={product._id || product.id}>
       <Card className="product-card h-100 border-0 shadow-sm">
@@ -116,8 +153,15 @@ export default function Catalog() {
                 </span>
               </div>
               <div className="rating">
-                <FaStar className="text-warning" />
-                <span className="ms-1">{product.rating}</span>
+                {product.reviewCount > 0 ? (
+                  <>
+                    <FaStar className="text-warning" />
+                    <span className="ms-1">{product.rating.toFixed(1)}</span>
+                    <small className="text-muted ms-1">({product.reviewCount})</small>
+                  </>
+                ) : (
+                  <small className="text-muted">No reviews yet</small>
+                )}
               </div>
             </div>
             <button
@@ -147,6 +191,11 @@ export default function Catalog() {
     <Container className="tshirt-products-page py-3 py-md-5">
       <div className="page-header-wrapper mb-4 mb-md-5">
         <h1 className="page-header">Our Products</h1>
+        
+        <FilterComponent 
+          sortOption={sortOption} 
+          onSortChange={handleSortChange} 
+        />
       </div>
 
       {loading ? (
@@ -163,14 +212,14 @@ export default function Catalog() {
           {/* Mobile view - show 2 products per row */}
           <div className="d-block d-md-none">
             <Row xs={2} className="g-3">
-              {products.slice(0, 4).map(product => renderProductCard(product))}
+              {filteredProducts.slice(0, 4).map(product => renderProductCard(product))}
             </Row>
           </div>
           
           {/* Tablet/Desktop view - show responsive columns */}
           <div className="d-none d-md-block">
             <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-              {products.map(product => renderProductCard(product))}
+              {filteredProducts.map(product => renderProductCard(product))}
             </Row>
           </div>
         </>

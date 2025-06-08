@@ -471,7 +471,7 @@ app.get('/auth/me', async (req, res) => {
 
 
 
-
+// Get reviews for a product
 app.get('/api/reviews/:productId', async (req, res) => {
   try {
     const reviews = await Review.find({ product: req.params.productId })
@@ -482,7 +482,7 @@ app.get('/api/reviews/:productId', async (req, res) => {
   }
 });
 
-// Add a review
+// Add a review and update product rating stats
 app.post('/api/reviews', async (req, res) => {
   try {
     const { product, userName, userEmail, rating, comment } = req.body;
@@ -492,12 +492,25 @@ app.post('/api/reviews', async (req, res) => {
       return res.status(404).json({ message: 'Product not found' });
     }
 
+    // Create the review
     const review = await Review.create({
       product,
       userName,
       userEmail,
       rating,
       comment
+    });
+
+    // Calculate new average rating and review count
+    const reviews = await Review.find({ product });
+    const totalRatings = reviews.reduce((sum, r) => sum + r.rating, 0);
+    const averageRating = totalRatings / reviews.length;
+    const reviewCount = reviews.length;
+
+    // Update the product with new rating stats
+    await Product.findByIdAndUpdate(product, {
+      averageRating: parseFloat(averageRating.toFixed(1)),
+      reviewCount
     });
 
     res.status(201).json(review);
