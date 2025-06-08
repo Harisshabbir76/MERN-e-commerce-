@@ -120,7 +120,7 @@ const ContactUs = () => {
     <Container className="contact-page py-5">
       <div className="page-header-wrapper mb-5 text-center">
         <h1 className="page-header">Contact Us</h1>
-        <div className="header-decoration mx-auto"></div>
+        
         <p className="lead mt-3">We'd love to hear from you!</p>
       </div>
       
