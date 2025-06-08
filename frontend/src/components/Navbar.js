@@ -8,7 +8,8 @@ import {
   Form,
   InputGroup,
   Badge,
-  Image
+  Image,
+  Offcanvas
 } from 'react-bootstrap';
 import { 
   FiShoppingBag, 
@@ -16,14 +17,19 @@ import {
   FiX, 
   FiSearch, 
   FiUser,
-  FiLogOut
+  FiLogOut,
+  FiHome,
+  FiShoppingCart,
+  FiGrid,
+  FiInfo,
+  FiMail
 } from 'react-icons/fi';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { CartContext } from '../components/CartContext';
 import logo from '../images/logo.png';
 
 const Navbar = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -32,11 +38,12 @@ const Navbar = () => {
   const { cartCount } = useContext(CartContext);
 
   const navLinks = [
-    { name: 'New Arrivals', path: '/new-arrivals' },
-    { name: 'Catalog', path: '/catalog' },
-    { name: 'Categories', path: '/category' },
-    { name: 'About', path: '/about-us' },
-    { name: 'Contact Us', path: '/contact-us' }
+    { name: 'Home', path: '/', icon: <FiHome size={18} /> },
+    { name: 'New Arrivals', path: '/new-arrivals', icon: <FiShoppingCart size={18} /> },
+    { name: 'Catalog', path: '/catalog', icon: <FiShoppingCart size={18} /> },
+    { name: 'Categories', path: '/category', icon: <FiGrid size={18} /> },
+    { name: 'About', path: '/about-us', icon: <FiInfo size={18} /> },
+    { name: 'Contact Us', path: '/contact-us', icon: <FiMail size={18} /> }
   ];
 
   useEffect(() => {
@@ -51,6 +58,7 @@ const Navbar = () => {
       localStorage.removeItem('userEmail');
       setIsLoggedIn(false);
       navigate('/');
+      setShowSidebar(false);
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -67,23 +75,6 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Mobile Menu Overlay */}
-      {isMenuOpen && (
-        <div 
-          className="d-md-none"
-          style={{
-            position: 'fixed',
-            top: '70px',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            zIndex: 1040,
-          }}
-          onClick={() => setIsMenuOpen(false)}
-        ></div>
-      )}
-
       <BootstrapNavbar 
         expand="md" 
         sticky="top" 
@@ -122,10 +113,10 @@ const Navbar = () => {
             <Button 
               variant="link" 
               className="d-md-none p-2"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={() => setShowSidebar(true)}
               style={{ color: 'white' }}
             >
-              {isMenuOpen ? <FiX size={20} /> : <FiMenu size={20} />}
+              <FiMenu size={20} />
             </Button>
           </div>
 
@@ -224,68 +215,72 @@ const Navbar = () => {
           </BootstrapNavbar.Collapse>
         </Container>
 
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div 
-            className="d-md-none"
-            style={{
-              position: 'fixed',
-              top: '70px',
-              left: 0,
-              right: 0,
-              zIndex: 1050,
-              backgroundColor: 'white',
-              boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-              padding: '1rem',
-              borderTop: '1px solid rgba(0,0,0,0.1)'
-            }}
-          >
-            {navLinks.map((link) => (
-              <Nav.Link
-                key={link.path}
-                as={Link}
-                to={link.path}
-                style={{
-                  display: 'block',
-                  padding: '0.75rem 1rem',
-                  borderRadius: '0.5rem',
-                  fontWeight: 500,
-                  fontSize: '1rem',
-                  color: location.pathname === link.path ? '#4f46e5' : '#1f2937',
-                  backgroundColor: location.pathname === link.path ? '#e0e7ff' : 'transparent',
-                  marginBottom: '0.25rem',
-                  textDecoration: 'none'
-                }}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {link.name}
-              </Nav.Link>
-            ))}
-            <div className="mt-3 pt-2 border-top">
-              <Nav.Link
-                as={Link}
-                to={isLoggedIn ? undefined : '/login'}
-                onClick={() => {
-                  if (isLoggedIn) {
-                    handleLogout();
-                  }
-                  setIsMenuOpen(false);
-                }}
-                style={{
-                  display: 'block',
-                  padding: '0.75rem 1rem',
-                  borderRadius: '0.5rem',
-                  fontWeight: 500,
-                  fontSize: '1rem',
-                  color: '#1f2937',
-                  textDecoration: 'none'
-                }}
-              >
-                {isLoggedIn ? 'Logout' : 'Login'}
-              </Nav.Link>
-            </div>
-          </div>
-        )}
+        {/* Mobile Sidebar */}
+        <Offcanvas
+          show={showSidebar}
+          onHide={() => setShowSidebar(false)}
+          placement="end"
+          style={{ width: '280px' }}
+        >
+          <Offcanvas.Header closeButton>
+            <Offcanvas.Title>Menu</Offcanvas.Title>
+          </Offcanvas.Header>
+          <Offcanvas.Body>
+            <Nav className="flex-column">
+              {navLinks.map((link) => (
+                <Nav.Link
+                  key={link.path}
+                  as={Link}
+                  to={link.path}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '0.75rem 1rem',
+                    borderRadius: '0.5rem',
+                    fontWeight: 500,
+                    fontSize: '1rem',
+                    color: location.pathname === link.path ? '#4f46e5' : '#1f2937',
+                    backgroundColor: location.pathname === link.path ? '#e0e7ff' : 'transparent',
+                    marginBottom: '0.25rem',
+                    textDecoration: 'none'
+                  }}
+                  onClick={() => setShowSidebar(false)}
+                >
+                  <span className="me-3">{link.icon}</span>
+                  {link.name}
+                </Nav.Link>
+              ))}
+              
+              <div className="mt-3 pt-2 border-top">
+                <Nav.Link
+                  as={Link}
+                  to={isLoggedIn ? undefined : '/login'}
+                  onClick={() => {
+                    if (isLoggedIn) {
+                      handleLogout();
+                    }
+                    setShowSidebar(false);
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '0.75rem 1rem',
+                    borderRadius: '0.5rem',
+                    fontWeight: 500,
+                    fontSize: '1rem',
+                    color: '#1f2937',
+                    textDecoration: 'none'
+                  }}
+                >
+                  <span className="me-3">
+                    {isLoggedIn ? <FiLogOut size={18} /> : <FiUser size={18} />}
+                  </span>
+                  {isLoggedIn ? 'Logout' : 'Login'}
+                </Nav.Link>
+              </div>
+            </Nav>
+          </Offcanvas.Body>
+        </Offcanvas>
 
         {/* Search Bar */}
         {isSearchOpen && (
