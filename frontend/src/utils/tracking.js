@@ -83,8 +83,12 @@ export const initTracking = () => {
   }
 };
 
+// Backward compatibility
+export const trackEvent = track;
+
 // Export all tracking functions
 export default {
   track,
+  trackEvent,
   initTracking
 };
