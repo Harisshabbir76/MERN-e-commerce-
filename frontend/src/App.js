@@ -27,7 +27,6 @@ import Logout from './components/Logout';
 import OrderManagement from "./components/OrderManagement"; 
 import DashboardContactUs from './components/contact-us';
 import DashboardCatalog from './components/dashboardCatalog';
-import Analytics from './components/UserAnalytics';
 
 function App() {
   const location = useLocation();
@@ -62,7 +61,6 @@ function App() {
         <Route path="/dashboard/order-management" element={<OrderManagement />} />
         <Route path="/dashboard/contactus" element={<DashboardContactUs />} />
         <Route path="/dashboard/catalog" element={<DashboardCatalog />} />
-        <Route path="/dashboard/analytics" element={<Analytics />} />
         <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>
     </Layout>
