@@ -1,6 +1,11 @@
-import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Layout from "./components/Layout";
+import {
+  trackPageView,
+  getSessionId,
+} from "./utils/tracking"; // import tracking
+
 // Import your pages
 import Home from "./pages/Home";
 import Login from "./pages/login";
@@ -25,6 +30,14 @@ import DashboardCatalog from './components/dashboardCatalog';
 import Analytics from './components/UserAnalytics';
 
 function App() {
+  const location = useLocation();
+
+  useEffect(() => {
+    // Initialize session and track page view on route change
+    getSessionId();
+    trackPageView();
+  }, [location]);
+
   return (
     <Layout>
       <Routes>
