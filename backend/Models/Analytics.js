@@ -12,15 +12,24 @@ const analyticsSchema = new mongoose.Schema({
       'search_result_click',
       'product_view',
       'checkout_start',
-      'account_login'
+      'account_login',
+      'external_link_click',
+      'video_play',
+      'tab_change',
+      'scroll_depth'
     ]
   },
   userId: { 
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
+    index: true,
+    required: false
+  },
+  sessionId: {
+    type: String,
+    required: true,
     index: true
   },
-  sessionId: String,
   ip: String,
   userAgent: String,
   pageUrl: String,
@@ -34,8 +43,9 @@ const analyticsSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Compound index for common queries
+// Compound indexes
 analyticsSchema.index({ userId: 1, timestamp: -1 });
+analyticsSchema.index({ sessionId: 1, timestamp: -1 });
 analyticsSchema.index({ eventType: 1, timestamp: -1 });
 analyticsSchema.index({ 'metadata.product_id': 1, timestamp: -1 });
 
