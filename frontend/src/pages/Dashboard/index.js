@@ -95,7 +95,18 @@ export default function Dashboard() {
                     Products
                 </Button>
 
+                <Button 
+                    variant="info" 
+                    size="lg"
+                    onClick={() => navigate('/dashboard/analytics')}
+                    className="p-4"
+                >
+                    Analytics
+                </Button>
+
             </div>
+
+            
         </Container>
     );
 }
