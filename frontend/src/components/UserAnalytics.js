@@ -21,7 +21,8 @@ import {
   FaEye, 
   FaMoneyBillWave, 
   FaCalendarAlt,
-  FaUserSecret
+  FaUserSecret,
+  FaSync
 } from 'react-icons/fa';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
@@ -39,43 +40,51 @@ const UserAnalytics = () => {
   const [activeTab, setActiveTab] = useState('activity');
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get('/api/analytics/users');
-        setUsers(response.data);
-      } catch (err) {
-        setError(err.response?.data?.message || 'Failed to load users');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await axios.get('/api/analytics/users');
+      // Ensure we always set an array, even if response.data is null/undefined
+      setUsers(Array.isArray(response?.data) ? response.data : []);
+    } catch (err) {
+      console.error('Error fetching users:', err);
+      setError(err.response?.data?.message || 'Failed to load users. Please try again.');
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const fetchUserActivity = async () => {
+    if (!selectedUser) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      const params = {
+        [selectedUser.userId ? 'userId' : 'sessionId']: selectedUser.id,
+        ...(startDate && { startDate: startDate.toISOString() }),
+        ...(endDate && { endDate: endDate.toISOString() })
+      };
+      
+      const response = await axios.get('/api/analytics/user-activity', { params });
+      setUserActivity(Array.isArray(response?.data) ? response.data : []);
+    } catch (err) {
+      console.error('Error fetching user activity:', err);
+      setError(err.response?.data?.message || 'Failed to load user activity. Please try again.');
+      setUserActivity([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchUsers();
   }, []);
 
   useEffect(() => {
-    if (selectedUser) {
-      const fetchUserActivity = async () => {
-        try {
-          setLoading(true);
-          const params = {
-            [selectedUser.userId ? 'userId' : 'sessionId']: selectedUser.id,
-            startDate: startDate?.toISOString(),
-            endDate: endDate?.toISOString()
-          };
-          const response = await axios.get('/api/analytics/user-activity', { params });
-          setUserActivity(response.data);
-        } catch (err) {
-          setError(err.response?.data?.message || 'Failed to load user activity');
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchUserActivity();
-    }
+    fetchUserActivity();
   }, [selectedUser, startDate, endDate]);
 
   const getEventIcon = (type) => {
@@ -93,31 +102,56 @@ const UserAnalytics = () => {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString();
+    try {
+      return new Date(dateString).toLocaleString();
+    } catch {
+      return 'Invalid date';
+    }
   };
 
   const getUserSummary = () => {
-    const summary = {
-      pageViews: userActivity.filter(a => a.eventType === 'page_view').length,
-      addToCarts: userActivity.filter(a => a.eventType === 'add_to_cart').length,
-      purchases: userActivity.filter(a => a.eventType === 'purchase').length,
-      searches: userActivity.filter(a => a.eventType === 'search_query').length,
-      productsViewed: userActivity.filter(a => a.eventType === 'product_view').length,
+    if (!Array.isArray(userActivity)) {
+      return {
+        pageViews: 0,
+        addToCarts: 0,
+        purchases: 0,
+        searches: 0,
+        productsViewed: 0,
+        lastActivity: null
+      };
+    }
+
+    return {
+      pageViews: userActivity.filter(a => a?.eventType === 'page_view').length,
+      addToCarts: userActivity.filter(a => a?.eventType === 'add_to_cart').length,
+      purchases: userActivity.filter(a => a?.eventType === 'purchase').length,
+      searches: userActivity.filter(a => a?.eventType === 'search_query').length,
+      productsViewed: userActivity.filter(a => a?.eventType === 'product_view').length,
       lastActivity: userActivity[0]?.timestamp
     };
-    return summary;
   };
 
-  const filteredUsers = users.filter(user => {
-    if (!searchQuery) return true;
+  const filteredUsers = (users || []).filter(user => {
+    if (!searchQuery || typeof searchQuery !== 'string') return true;
+    
     const query = searchQuery.toLowerCase();
-    return (
-      (user.name && user.name.toLowerCase().includes(query)) ||
-      (user.email && user.email.toLowerCase().includes(query)) ||
-      (user.sessionId && user.sessionId.toLowerCase().includes(query)) ||
-      (user.userAgent && user.userAgent.toLowerCase().includes(query))
-    );
+    const userFields = [
+      user?.name,
+      user?.email,
+      user?.sessionId,
+      user?.userAgent
+    ].filter(Boolean).map(f => f.toLowerCase());
+
+    return userFields.some(field => field.includes(query));
   });
+
+  const handleRetry = () => {
+    if (selectedUser) {
+      fetchUserActivity();
+    } else {
+      fetchUsers();
+    }
+  };
 
   return (
     <Container className="py-4">
@@ -138,45 +172,57 @@ const UserAnalytics = () => {
               />
             </Card.Header>
             <Card.Body className="p-0" style={{ maxHeight: '80vh', overflowY: 'auto' }}>
-              {loading ? (
+              {loading && !selectedUser ? (
                 <div className="text-center py-5">
                   <Spinner animation="border" variant="primary" />
+                  <p className="mt-2">Loading users...</p>
                 </div>
-              ) : error ? (
-                <Alert variant="danger">{error}</Alert>
+              ) : error && !selectedUser ? (
+                <div className="text-center py-5">
+                  <Alert variant="danger">{error}</Alert>
+                  <Button variant="primary" size="sm" onClick={handleRetry}>
+                    <FaSync className="me-1" /> Retry
+                  </Button>
+                </div>
               ) : (
                 <ListGroup variant="flush">
-                  {filteredUsers.map(user => (
-                    <ListGroup.Item 
-                      key={user.id}
-                      action 
-                      active={selectedUser?.id === user.id}
-                      onClick={() => setSelectedUser(user)}
-                      className="d-flex justify-content-between align-items-start py-3"
-                    >
-                      <div className="me-3">
-                        <div className="d-flex align-items-center mb-1">
-                          {user.isAnonymous ? (
-                            <FaUserSecret className="me-2 text-muted" />
-                          ) : (
-                            <FaUser className="me-2" />
-                          )}
-                          <strong className="text-truncate" style={{ maxWidth: '150px' }}>
-                            {user.name || user.email || `Session ${user.sessionId.substring(0, 6)}`}
-                          </strong>
+                  {filteredUsers.length > 0 ? (
+                    filteredUsers.map(user => (
+                      <ListGroup.Item 
+                        key={user.id}
+                        action 
+                        active={selectedUser?.id === user.id}
+                        onClick={() => setSelectedUser(user)}
+                        className="d-flex justify-content-between align-items-start py-3"
+                      >
+                        <div className="me-3">
+                          <div className="d-flex align-items-center mb-1">
+                            {user.isAnonymous ? (
+                              <FaUserSecret className="me-2 text-muted" />
+                            ) : (
+                              <FaUser className="me-2" />
+                            )}
+                            <strong className="text-truncate" style={{ maxWidth: '150px' }}>
+                              {user.name || user.email || `Session ${user.sessionId?.substring(0, 6) || 'N/A'}`}
+                            </strong>
+                          </div>
+                          <small className="text-muted d-block text-truncate" style={{ maxWidth: '200px' }}>
+                            {user.userAgent || 'Unknown device'}
+                          </small>
+                          <small className="text-muted">
+                            {user.lastActivity ? formatDate(user.lastActivity) : 'No activity'}
+                          </small>
                         </div>
-                        <small className="text-muted d-block text-truncate" style={{ maxWidth: '200px' }}>
-                          {user.userAgent}
-                        </small>
-                        <small className="text-muted">
-                          {new Date(user.lastActivity).toLocaleDateString()}
-                        </small>
-                      </div>
-                      <Badge bg={user.isAnonymous ? 'secondary' : 'primary'}>
-                        {user.activityCount}
-                      </Badge>
+                        <Badge bg={user.isAnonymous ? 'secondary' : 'primary'}>
+                          {user.activityCount || 0}
+                        </Badge>
+                      </ListGroup.Item>
+                    ))
+                  ) : (
+                    <ListGroup.Item className="text-center py-4">
+                      {searchQuery ? 'No matching users found' : 'No users available'}
                     </ListGroup.Item>
-                  ))}
+                  )}
                 </ListGroup>
               )}
             </Card.Body>
@@ -195,10 +241,10 @@ const UserAnalytics = () => {
                       ) : (
                         <FaUser className="me-2" />
                       )}
-                      {selectedUser.name || selectedUser.email || `Anonymous Session`}
+                      {selectedUser.name || selectedUser.email || 'Anonymous Session'}
                     </h5>
                     <small className="text-muted">
-                      {selectedUser.userAgent}
+                      {selectedUser.userAgent || 'Unknown device'}
                     </small>
                   </div>
                   <div className="d-flex flex-wrap gap-2">
@@ -234,9 +280,17 @@ const UserAnalytics = () => {
                         <p className="mt-3">Loading user activity...</p>
                       </div>
                     ) : error ? (
-                      <Alert variant="danger">{error}</Alert>
+                      <div className="text-center py-5">
+                        <Alert variant="danger">{error}</Alert>
+                        <Button variant="primary" size="sm" onClick={handleRetry}>
+                          <FaSync className="me-1" /> Retry
+                        </Button>
+                      </div>
                     ) : userActivity.length === 0 ? (
-                      <Alert variant="info">No activity found for this {selectedUser.isAnonymous ? 'session' : 'user'}</Alert>
+                      <Alert variant="info">
+                        No activity found for this {selectedUser.isAnonymous ? 'session' : 'user'}
+                        {startDate || endDate ? ' in the selected date range' : ''}
+                      </Alert>
                     ) : (
                       <div className="table-responsive" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
                         <Table striped bordered hover>
@@ -258,12 +312,12 @@ const UserAnalytics = () => {
                                   <div className="d-flex align-items-center">
                                     {getEventIcon(activity.eventType)}
                                     <span className="ms-2 text-capitalize">
-                                      {activity.eventType.replace(/_/g, ' ')}
+                                      {activity.eventType?.replace(/_/g, ' ') || 'Unknown event'}
                                     </span>
                                   </div>
                                 </td>
                                 <td>
-                                  {activity.metadata && (
+                                  {activity.metadata ? (
                                     <pre className="mb-0" style={{
                                       whiteSpace: 'pre-wrap',
                                       fontSize: '0.8rem',
@@ -273,10 +327,12 @@ const UserAnalytics = () => {
                                     }}>
                                       {JSON.stringify(activity.metadata, null, 2)}
                                     </pre>
+                                  ) : (
+                                    <span className="text-muted">No details</span>
                                   )}
                                 </td>
                                 <td>
-                                  {activity.pageUrl && (
+                                  {activity.pageUrl ? (
                                     <a 
                                       href={activity.pageUrl} 
                                       target="_blank" 
@@ -286,6 +342,8 @@ const UserAnalytics = () => {
                                     >
                                       {activity.pageUrl}
                                     </a>
+                                  ) : (
+                                    <span className="text-muted">No URL</span>
                                   )}
                                 </td>
                               </tr>
@@ -332,12 +390,16 @@ const UserAnalytics = () => {
                           <Card>
                             <Card.Body>
                               <Card.Title>Product Interactions</Card.Title>
-                              {userActivity.filter(a => ['add_to_cart', 'purchase', 'product_view'].includes(a.eventType)).length === 0 ? (
-                                <Alert variant="info">No product interactions</Alert>
+                              {userActivity.filter(a => 
+                                a?.eventType && ['add_to_cart', 'purchase', 'product_view'].includes(a.eventType)
+                              ).length === 0 ? (
+                                <Alert variant="info">No product interactions found</Alert>
                               ) : (
                                 <ListGroup variant="flush">
                                   {userActivity
-                                    .filter(a => ['add_to_cart', 'purchase', 'product_view'].includes(a.eventType))
+                                    .filter(a => 
+                                      a?.eventType && ['add_to_cart', 'purchase', 'product_view'].includes(a.eventType)
+                                    )
                                     .slice(0, 5)
                                     .map((activity, index) => (
                                       <ListGroup.Item key={index}>
