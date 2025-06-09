@@ -6,8 +6,8 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { CartProvider } from './components/CartContext';
-import TrackingProvider from './components/TrackingProvider'; // Add this import
-import CookieBanner from './components/CookieBanner'; // Add this import
+import TrackingProvider from './components/TrackingProvider';
+import CookieBanner from './components/CookieBanner';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
