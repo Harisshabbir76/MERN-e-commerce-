@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { track } from '../utils/tracking';
+import { trackEvent as track } from '../utils/tracking';
+
+
 
 export default function TrackingProvider({ children }) {
   const location = useLocation();
