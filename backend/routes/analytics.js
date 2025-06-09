@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const Analytics = require('../models/Analytics');
-const User = require('../models/User');
+const Analytics = require('../Models/Analytics');
+const User = require('../Models/User');
 
 // Get all users with activity
 router.get('/users', async (req, res) => {
