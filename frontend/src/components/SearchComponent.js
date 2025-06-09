@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Form, InputGroup, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { trackEvent } from '../utils/tracking';
 
-const SearchComponent = ({ onClose }) => {
+const SearchComponent = ({ onClose, searchSource = 'header' }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
@@ -14,7 +15,13 @@ const SearchComponent = ({ onClose }) => {
   const performSearch = () => {
     const trimmedSearch = searchTerm.trim();
     if (trimmedSearch) {
-      navigate(`/search/${encodeURIComponent(trimmedSearch)}`);
+      trackEvent('search_query', {
+        query: trimmedSearch,
+        source: searchSource,
+        timestamp: new Date().toISOString()
+      });
+      
+      navigate(`/search?query=${encodeURIComponent(trimmedSearch)}`);
       if (onClose) onClose();
     }
   };
@@ -25,23 +32,21 @@ const SearchComponent = ({ onClose }) => {
         <InputGroup>
           <Form.Control
             type="text"
-            placeholder="Search products by name..."
+            placeholder="Search products..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             autoFocus
+            data-track="search_input"
           />
-          <Button 
-            variant="primary" 
+          <Button
+            variant="primary"
             onClick={performSearch}
+            data-track="search_submit"
           >
             Search
           </Button>
           {onClose && (
-            <Button 
-              variant="link" 
-              onClick={onClose}
-              style={{ marginLeft: '8px' }}
-            >
+            <Button variant="link" onClick={onClose} style={{ marginLeft: '8px' }}>
               ✖
             </Button>
           )}

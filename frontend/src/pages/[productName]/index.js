@@ -273,18 +273,29 @@ export default function ProductDetails() {
                   >
                     Order Now
                   </Button>
-                  <Button
-                    variant="outline-primary"
-                    size="lg"
-                    onClick={handleAddToCart}
-                    style={{
-                      borderColor: '#667eea',
-                      color: '#667eea',
-                      flex: 1
-                    }}
-                  >
-                    Add to Cart
-                  </Button>
+                 <Button
+                  variant="outline-primary"
+                  size="lg"
+                  onClick={() => {
+                    handleAddToCart();
+                    // Optional: You can also track here if not using automatic data-attribute tracking
+                  }}
+                  style={{
+                    borderColor: '#667eea',
+                    color: '#667eea',
+                    flex: 1
+                  }}
+                  data-track="add_to_cart"
+                  data-track-meta={JSON.stringify({
+                    product_id: product.id,
+                    price: product.price,
+                    name: product.name,
+                    category: product.category,
+                    
+                  })}
+                >
+                  Add to Cart
+                </Button>
                 </>
               ) : (
                 <Button

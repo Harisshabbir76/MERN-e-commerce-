@@ -1,20 +1,20 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { 
-  Container, 
-  Row, 
-  Col, 
-  Card, 
-  Spinner, 
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Spinner,
   Alert,
-  Button,
   Badge,
   Stack
 } from 'react-bootstrap';
 import { FaShoppingCart, FaBoxOpen, FaStar } from 'react-icons/fa';
 import { CartContext } from '../components/CartContext';
-import './heroSlider.css'; // Create this CSS file
+import { trackEvent } from '../utils/tracking';
+import './heroSlider.css';
 
 const SearchResults = () => {
   const [results, setResults] = useState([]);
@@ -29,14 +29,31 @@ const SearchResults = () => {
     const fetchResults = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`https://sublime-magic-production.up.railway.app/search?query=${query}`);
-        setResults(response.data.map(product => ({
+        const response = await axios.get(
+          `https://sublime-magic-production.up.railway.app/search?query=${query}`
+        );
+        
+        const products = response.data.map(product => ({
           ...product,
           stock: product.stock || Math.floor(Math.random() * 16) + 5,
-          rating: product.rating || (Math.random() * 1 + 4).toFixed(1) // Default rating 4.0-5.0
-        })));
+          rating: product.rating || (Math.random() * 1 + 4).toFixed(1)
+        }));
+        
+        setResults(products);
+        
+        trackEvent('search_results', {
+          query,
+          result_count: products.length,
+          has_results: products.length > 0,
+          top_categories: [...new Set(products.map(p => p.category))].slice(0, 3)
+        });
+        
       } catch (error) {
         setError(error.response?.data?.error || 'Failed to load search results');
+        trackEvent('search_error', {
+          query,
+          error: error.message
+        });
       } finally {
         setLoading(false);
       }
@@ -49,17 +66,20 @@ const SearchResults = () => {
 
   const handleAddToCart = (product) => {
     if (product.stock > 0) {
-      addToCart({ 
-        ...product, 
-        quantity: 1 
+      addToCart({ ...product, quantity: 1 });
+      trackEvent('search_add_to_cart', {
+        query,
+        product_id: product._id,
+        price: product.price
       });
     }
   };
 
   const getProductImage = (product) => {
     if (!product?.image?.[0]) return '/placeholder.jpg';
-    if (product.image[0].startsWith('http')) return product.image[0];
-    return `https://sublime-magic-production.up.railway.app${product.image[0]}`;
+    return product.image[0].startsWith('http') 
+      ? product.image[0] 
+      : `https://sublime-magic-production.up.railway.app${product.image[0]}`;
   };
 
   if (loading) {
@@ -77,10 +97,7 @@ const SearchResults = () => {
         <Alert variant="danger" className="text-center">
           <h5>Search Error</h5>
           <p className="mb-3">{error}</p>
-          <Button 
-            variant="outline-danger" 
-            onClick={() => window.location.reload()}
-          >
+          <Button variant="outline-danger" onClick={() => window.location.reload()}>
             Try Again
           </Button>
         </Alert>
@@ -93,126 +110,139 @@ const SearchResults = () => {
       <div className="page-header-wrapper mb-4 mb-md-5 text-center">
         <h1 className="page-header">Search Results for "{query}"</h1>
         <div className="header-decoration mx-auto"></div>
+        {results.length > 0 && (
+          <p className="text-muted mt-2">
+            Found {results.length} {results.length === 1 ? 'result' : 'results'}
+          </p>
+        )}
       </div>
 
       {results.length === 0 ? (
         <Alert variant="info" className="text-center my-5">
           <h5>No Results Found</h5>
-          <p className="mb-0">We couldn't find any products matching your search.</p>
+          <p className="mb-0">We couldn't find any products matching "{query}"</p>
         </Alert>
       ) : (
-        <>
-          {/* Mobile view - 2 products per row */}
-          <div className="d-block d-md-none">
-            <Row xs={2} className="g-3">
-              {results.map(product => (
-                <ProductCard 
-                  key={product._id} 
-                  product={product} 
-                  onAddToCart={handleAddToCart}
-                  onViewDetails={() => navigate(`/product/${product._id}`)}
-                />
-              ))}
-            </Row>
-          </div>
-          
-          {/* Tablet/Desktop view - responsive columns */}
-          <div className="d-none d-md-block">
-            <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-              {results.map(product => (
-                <ProductCard 
-                  key={product._id} 
-                  product={product} 
-                  onAddToCart={handleAddToCart}
-                  onViewDetails={() => navigate(`/product/${product._id}`)}
-                />
-              ))}
-            </Row>
-          </div>
-        </>
+        <Row className="g-3 g-md-4">
+          {results.map((product, index) => (
+            <Col key={product._id} xs={6} md={4} lg={3}>
+              <ProductCard 
+                product={product} 
+                onAddToCart={() => handleAddToCart(product)}
+                onViewDetails={() => navigate(`/product/${product._id}`)}
+                searchQuery={query}
+                position={index + 1}
+              />
+            </Col>
+          ))}
+        </Row>
       )}
     </Container>
   );
 };
 
-const ProductCard = ({ product, onAddToCart, onViewDetails }) => {
+const ProductCard = ({ product, onAddToCart, onViewDetails, searchQuery, position }) => {
+  const handleViewDetailsWithTracking = () => {
+    trackEvent('search_result_click', {
+      query: searchQuery,
+      product_id: product._id,
+      product_name: product.name,
+      position,
+      price: product.price,
+      category: product.category
+    });
+    onViewDetails();
+  };
+
   const getProductImage = (product) => {
     if (!product?.image?.[0]) return '/placeholder.jpg';
-    if (product.image[0].startsWith('http')) return product.image[0];
-    return `https://sublime-magic-production.up.railway.app${product.image[0]}`;
+    return product.image[0].startsWith('http') 
+      ? product.image[0] 
+      : `https://sublime-magic-production.up.railway.app${product.image[0]}`;
   };
 
   return (
-    <Col>
-      <Card className="product-card h-100 border-0 shadow-sm">
-        <div className="product-image-container">
-          <Card.Img
-            variant="top"
-            src={getProductImage(product)}
-            alt={product.name}
-            onClick={onViewDetails}
-            className="product-img"
-            onError={(e) => {
-              e.target.src = '/placeholder.jpg';
-            }}
-          />
-          {product.discountedPrice < product.price && (
-            <div className="discount-badge">
-             {Math.round(100 - (product.discountedPrice / product.price * 100))}% OFF
-            </div>
-          )}
-          <Badge 
-            bg={product.stock > 0 ? "success" : "danger"} 
-            className="stock-badge"
-          >
-            {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
-          </Badge>
-        </div>
-        <Card.Body className="d-flex flex-column">
-          <Card.Title className="product-title" onClick={onViewDetails}>
-            {product.name}
-          </Card.Title>
-          <Card.Text className="text-muted product-category">
-            {product.category || 'Uncategorized'}
-          </Card.Text>
-          <div className="mt-auto">
-            <div className="d-flex justify-content-between align-items-center mb-2">
-              <div className="price">
-                {product.discountedPrice < product.price && (
-                  <span className="original-price text-muted text-decoration-line-through me-2">
-                    ${product.price}
-                  </span>
-                )}
-                <span className="current-price fw-bold">
-                  ${product.discountedPrice || product.price}
-                </span>
-              </div>
-              <div className="rating">
-                <FaStar className="text-warning" />
-                <span className="ms-1">{product.rating}</span>
-              </div>
-            </div>
-            <button
-              className={`add-to-cart-btn w-100 mt-2 ${product.stock <= 0 ? 'disabled' : ''}`}
-              onClick={() => onAddToCart(product)}
-              disabled={product.stock <= 0}
-            >
-              {product.stock > 0 ? (
-                <>
-                  <FaShoppingCart className="me-2" />
-                  Add to Cart
-                </>
-              ) : (
-                <>
-                  <FaBoxOpen className="me-2" />
-                  Out of Stock
-                </>
-              )}
-            </button>
+    <Card className="product-card h-100 border-0 shadow-sm">
+      <div className="product-image-container">
+        <Card.Img
+          variant="top"
+          src={getProductImage(product)}
+          alt={product.name}
+          onClick={handleViewDetailsWithTracking}
+          className="product-img"
+          onError={(e) => {
+            e.target.src = '/placeholder.jpg';
+          }}
+        />
+        {product.discountedPrice < product.price && (
+          <div className="discount-badge">
+            {Math.round(100 - (product.discountedPrice / product.price * 100))}% OFF
           </div>
-        </Card.Body>
-      </Card>
-    </Col>
+        )}
+        <Badge bg={product.stock > 0 ? "success" : "danger"} className="stock-badge">
+          {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
+        </Badge>
+      </div>
+      <Card.Body className="d-flex flex-column">
+        <Card.Title className="product-title" onClick={handleViewDetailsWithTracking}>
+          {product.name}
+        </Card.Title>
+        <Card.Text className="text-muted product-category">
+          {product.category || 'Uncategorized'}
+        </Card.Text>
+        <div className="mt-auto">
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <div className="price">
+              {product.discountedPrice < product.price && (
+                <span className="original-price text-muted text-decoration-line-through me-2">
+                  ${product.price}
+                </span>
+              )}
+              <span className="current-price fw-bold">
+                ${product.discountedPrice || product.price}
+              </span>
+            </div>
+            <div className="rating">
+              <FaStar className="text-warning" />
+              <span className="ms-1">{product.rating}</span>
+            </div>
+          </div>
+          <button
+            className={`add-to-cart-btn w-100 mt-2 ${product.stock <= 0 ? 'disabled' : ''}`}
+            onClick={() => {
+              onAddToCart();
+              trackEvent('product_add_from_search', {
+                query: searchQuery,
+                product_id: product._id,
+                position
+              });
+            }}
+            disabled={product.stock <= 0}
+            data-track="add_to_cart"
+            data-track-meta={JSON.stringify({
+              product_id: product._id,
+              price: product.price,
+              name: product.name,
+              category: product.category,
+              from_search: true,
+              search_query: searchQuery
+            })}
+          >
+            {product.stock > 0 ? (
+              <>
+                <FaShoppingCart className="me-2" />
+                Add to Cart
+              </>
+            ) : (
+              <>
+                <FaBoxOpen className="me-2" />
+                Out of Stock
+              </>
+            )}
+          </button>
+        </div>
+      </Card.Body>
+    </Card>
   );
 };
 

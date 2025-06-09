@@ -558,8 +558,19 @@ app.delete('/delete/:id', async (req, res) => {
 });
 
 
+const analyticsRoutes = require('./routes/analytics');
+app.use('/api/analytics', analyticsRoutes);
 
-
+// Privacy endpoint
+app.get('/api/privacy', (req, res) => {
+  res.json({
+    tracking: {
+      cookies: ['session', 'preferences'],
+      data_collected: ['page_views', 'click_events', 'device_info'],
+      retention_period: '90 days'
+    }
+  });
+});
 
 
 

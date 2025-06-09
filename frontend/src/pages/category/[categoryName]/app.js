@@ -244,11 +244,16 @@ export default function CategoryProducts() {
                         </div>
                         <button
                           className={`add-to-cart-btn w-100 mt-2 ${product.stock <= 0 ? 'disabled' : ''}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleAddToCart(product);
-                          }}
+                          onClick={() => handleAddToCart(product)}
                           disabled={product.stock <= 0}
+                          data-track="add_to_cart"
+                          data-track-meta={JSON.stringify({
+                            product_id: product.id,
+                            price: product.price,
+                            name: product.name,
+                            category: product.category,
+                            stock_status: product.stock > 0 ? 'in_stock' : 'out_of_stock'
+                          })}
                         >
                           {product.stock > 0 ? (
                             <>
