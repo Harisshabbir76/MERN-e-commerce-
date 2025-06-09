@@ -40,20 +40,8 @@ const SearchResults = () => {
         }));
         
         setResults(products);
-        
-        trackEvent('search_results', {
-          query,
-          result_count: products.length,
-          has_results: products.length > 0,
-          top_categories: [...new Set(products.map(p => p.category))].slice(0, 3)
-        });
-        
       } catch (error) {
         setError(error.response?.data?.error || 'Failed to load search results');
-        trackEvent('search_error', {
-          query,
-          error: error.message
-        });
       } finally {
         setLoading(false);
       }
@@ -67,11 +55,6 @@ const SearchResults = () => {
   const handleAddToCart = (product) => {
     if (product.stock > 0) {
       addToCart({ ...product, quantity: 1 });
-      trackEvent('search_add_to_cart', {
-        query,
-        product_id: product._id,
-        price: product.price
-      });
     }
   };
 
@@ -124,14 +107,12 @@ const SearchResults = () => {
         </Alert>
       ) : (
         <Row className="g-3 g-md-4">
-          {results.map((product, index) => (
+          {results.map((product) => (
             <Col key={product._id} xs={6} md={4} lg={3}>
               <ProductCard 
                 product={product} 
                 onAddToCart={() => handleAddToCart(product)}
                 onViewDetails={() => navigate(`/product/${product._id}`)}
-                searchQuery={query}
-                position={index + 1}
               />
             </Col>
           ))}
@@ -141,19 +122,7 @@ const SearchResults = () => {
   );
 };
 
-const ProductCard = ({ product, onAddToCart, onViewDetails, searchQuery, position }) => {
-  const handleViewDetailsWithTracking = () => {
-    trackEvent('search_result_click', {
-      query: searchQuery,
-      product_id: product._id,
-      product_name: product.name,
-      position,
-      price: product.price,
-      category: product.category
-    });
-    onViewDetails();
-  };
-
+const ProductCard = ({ product, onAddToCart, onViewDetails }) => {
   const getProductImage = (product) => {
     if (!product?.image?.[0]) return '/placeholder.jpg';
     return product.image[0].startsWith('http') 
@@ -168,7 +137,7 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, searchQuery, positio
           variant="top"
           src={getProductImage(product)}
           alt={product.name}
-          onClick={handleViewDetailsWithTracking}
+          onClick={onViewDetails}
           className="product-img"
           onError={(e) => {
             e.target.src = '/placeholder.jpg';
@@ -184,7 +153,7 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, searchQuery, positio
         </Badge>
       </div>
       <Card.Body className="d-flex flex-column">
-        <Card.Title className="product-title" onClick={handleViewDetailsWithTracking}>
+        <Card.Title className="product-title" onClick={onViewDetails}>
           {product.name}
         </Card.Title>
         <Card.Text className="text-muted product-category">
@@ -209,24 +178,8 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, searchQuery, positio
           </div>
           <button
             className={`add-to-cart-btn w-100 mt-2 ${product.stock <= 0 ? 'disabled' : ''}`}
-            onClick={() => {
-              onAddToCart();
-              trackEvent('product_add_from_search', {
-                query: searchQuery,
-                product_id: product._id,
-                position
-              });
-            }}
+            onClick={() => onAddToCart()}
             disabled={product.stock <= 0}
-            data-track="add_to_cart"
-            data-track-meta={JSON.stringify({
-              product_id: product._id,
-              price: product.price,
-              name: product.name,
-              category: product.category,
-              from_search: true,
-              search_query: searchQuery
-            })}
           >
             {product.stock > 0 ? (
               <>

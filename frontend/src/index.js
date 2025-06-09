@@ -11,30 +11,11 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <TrackingProvider>
-        <CookieBanner />
-        <CartProvider>
-          <App />
-        </CartProvider>
-      </TrackingProvider>
+      <CartProvider>
+        <App />
+      </CartProvider>
     </BrowserRouter>
   </React.StrictMode>
 );
 
-// Optional: Track web vitals
-reportWebVitals((metric) => {
-  if (localStorage.getItem('cookieConsent') === 'true') {
-    fetch('https://sublime-magic-production.up.railway.app/api/analytics/track', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        eventName: 'web_vitals',
-        metadata: {
-          name: metric.name,
-          value: metric.value,
-          rating: metric.rating
-        }
-      })
-    });
-  }
-});
+reportWebVitals();

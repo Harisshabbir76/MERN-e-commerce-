@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Container, Row, Col, Card, Spinner, Alert } from 'react-bootstrap';
-import { FaStar, FaShoppingCart } from 'react-icons/fa';
+import { FaStar, FaShoppingCart, FaBoxOpen } from 'react-icons/fa';
 import { useCart } from '../components/CartContext';
 import './heroSlider.css';
 import { useNavigate } from 'react-router-dom';
@@ -58,7 +58,6 @@ export default function BottomProducts() {
     });
   };
 
-  // Function to render product card
   const renderProductCard = (product) => (
     <Col key={product._id || product.id}>
       <Card className="product-card h-100 border-0 shadow-sm">
@@ -106,22 +105,22 @@ export default function BottomProducts() {
               </div>
             </div>
             <button
-                          className={`add-to-cart-btn w-100 mt-2 ${product.stock <= 0 ? 'disabled' : ''}`}
-                          onClick={() => handleAddToCart(product)}
-                          disabled={product.stock <= 0}
-                        >
-                          {product.stock > 0 ? (
-                            <>
-                              <FaShoppingCart className="me-2" />
-                              Add to Cart
-                            </>
-                          ) : (
-                            <>
-                              <FaBoxOpen className="me-2" />
-                              Out of Stock
-                            </>
-                          )}
-                        </button>
+              className={`add-to-cart-btn w-100 mt-2 ${product.stock <= 0 ? 'disabled' : ''}`}
+              onClick={() => handleAddToCart(product)}
+              disabled={product.stock <= 0}
+            >
+              {product.stock > 0 ? (
+                <>
+                  <FaShoppingCart className="me-2" />
+                  Add to Cart
+                </>
+              ) : (
+                <>
+                  <FaBoxOpen className="me-2" />
+                  Out of Stock
+                </>
+              )}
+            </button>
           </div>
         </Card.Body>
       </Card>
@@ -145,14 +144,12 @@ export default function BottomProducts() {
         </Alert>
       ) : (
         <>
-          {/* Mobile view - show only 4 products (2x2 grid) */}
           <div className="d-block d-md-none">
             <Row xs={2} className="g-3">
               {bottoms.slice(0, 4).map(product => renderProductCard(product))}
             </Row>
           </div>
           
-          {/* Tablet/Desktop view - show all products with responsive columns */}
           <div className="d-none d-md-block">
             <Row xs={1} sm={2} md={3} lg={4} className="g-4">
               {bottoms.map(product => renderProductCard(product))}
