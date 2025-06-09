@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Form, InputGroup, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { trackEvent } from '../utils/tracking';
 
 const SearchComponent = ({ onClose, searchSource = 'header' }) => {
   const [searchTerm, setSearchTerm] = useState('');

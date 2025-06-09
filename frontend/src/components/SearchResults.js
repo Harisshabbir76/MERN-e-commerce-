@@ -14,7 +14,6 @@ import {
 } from 'react-bootstrap';
 import { FaShoppingCart, FaBoxOpen, FaStar } from 'react-icons/fa';
 import { CartContext } from '../components/CartContext';
-import { trackEvent } from '../utils/tracking';
 import './heroSlider.css';
 
 const SearchResults = () => {
