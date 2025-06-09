@@ -106,12 +106,22 @@ export default function BottomProducts() {
               </div>
             </div>
             <button
-              className="add-to-cart-btn w-100 mt-2"
-              onClick={() => handleAddToCart(product)}
-            >
-              <FaShoppingCart className="me-2" />
-              Add to Cart
-            </button>
+                          className={`add-to-cart-btn w-100 mt-2 ${product.stock <= 0 ? 'disabled' : ''}`}
+                          onClick={() => handleAddToCart(product)}
+                          disabled={product.stock <= 0}
+                        >
+                          {product.stock > 0 ? (
+                            <>
+                              <FaShoppingCart className="me-2" />
+                              Add to Cart
+                            </>
+                          ) : (
+                            <>
+                              <FaBoxOpen className="me-2" />
+                              Out of Stock
+                            </>
+                          )}
+                        </button>
           </div>
         </Card.Body>
       </Card>
