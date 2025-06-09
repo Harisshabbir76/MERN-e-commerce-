@@ -9,7 +9,8 @@ import {
   Spinner,
   Alert,
   Badge,
-  Stack
+  Stack,
+  Button 
 } from 'react-bootstrap';
 import { FaShoppingCart, FaBoxOpen, FaStar } from 'react-icons/fa';
 import { CartContext } from '../components/CartContext';
