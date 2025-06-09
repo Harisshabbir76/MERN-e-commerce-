@@ -37,7 +37,7 @@ export const track = (eventName, metadata = {}) => {
   };
 
   // Use sendBeacon if available, otherwise use fetch with keepalive
-  const url = '/api/analytics/track';
+  const url = 'https://sublime-magic-production.up.railway.app/api/analytics/track';
   const data = JSON.stringify(payload);
 
   try {

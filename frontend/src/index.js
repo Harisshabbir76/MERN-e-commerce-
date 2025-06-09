@@ -26,7 +26,7 @@ root.render(
 // Optional: Track web vitals
 reportWebVitals((metric) => {
   if (localStorage.getItem('cookieConsent') === 'true') {
-    fetch('/api/analytics/track', {
+    fetch('https://sublime-magic-production.up.railway.app/api/analytics/track', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
