@@ -47,7 +47,7 @@ export default function Cart() {
                 <td>
                   <div className="d-flex align-items-center">
                     <img
-                      src={`https://sublime-magic-production.up.railway.app${item.image[0]}`}
+                      src={`https://mern-e-commerce-yjbp.vercel.app/${item.image[0]}`}
                       alt={item.name}
                       className="cart-item-img"
                     />
@@ -99,7 +99,7 @@ export default function Cart() {
               <Row>
                 <Col xs={4}>
                   <img
-                    src={`https://sublime-magic-production.up.railway.app${item.image[0]}`}
+                    src={`https://mern-e-commerce-yjbp.vercel.app/${item.image[0]}`}
                     alt={item.name}
                     className="cart-item-img-mobile"
                   />

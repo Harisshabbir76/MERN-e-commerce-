@@ -29,7 +29,7 @@ const NewArrivals = () => {
   useEffect(() => {
     const fetchNewArrivals = async () => {
       try {
-        const response = await axios.get('https://sublime-magic-production.up.railway.app/new-arrival');
+        const response = await axios.get('https://mern-e-commerce-yjbp.vercel.app/new-arrival');
         const productsWithDefaults = response.data.map(product => ({
           ...product,
           stock: product.stock !== undefined ? product.stock : Math.floor(Math.random() * 16) + 5,
@@ -86,7 +86,7 @@ const NewArrivals = () => {
   const getProductImage = (product) => {
     if (!product?.image?.[0]) return '/placeholder.jpg';
     if (product.image[0].startsWith('http')) return product.image[0];
-    return `https://sublime-magic-production.up.railway.app${product.image[0]}`;
+    return `https://mern-e-commerce-yjbp.vercel.app${product.image[0]}`;
   };
 
   return (
@@ -157,7 +157,7 @@ const ProductCard = ({ product, onAddToCart, onViewDetails }) => {
   const getProductImage = (product) => {
     if (!product?.image?.[0]) return '/placeholder.jpg';
     if (product.image[0].startsWith('http')) return product.image[0];
-    return `https://sublime-magic-production.up.railway.app${product.image[0]}`;
+    return `https://mern-e-commerce-yjbp.vercel.app${product.image[0]}`;
   };
 
   return (

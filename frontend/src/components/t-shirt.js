@@ -16,7 +16,7 @@ export default function TshirtProducts() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get('https://sublime-magic-production.up.railway.app/catalog');
+        const res = await axios.get('https://mern-e-commerce-yjbp.vercel.app/catalog');
         const data = res.data;
 
         console.log('API response:', data);
@@ -68,7 +68,7 @@ export default function TshirtProducts() {
             variant="top"
             src={
               product.image?.[0]
-                ? `https://sublime-magic-production.up.railway.app${product.image[0]}`
+                ? `https://mern-e-commerce-yjbp.vercel.app${product.image[0]}`
                 : '/placeholder.jpg'
             }
             alt={product.name}

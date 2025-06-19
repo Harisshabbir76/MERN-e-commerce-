@@ -55,7 +55,7 @@ const ProductEditModal = ({ show, product, onClose, onSave }) => {
         formData.append('image', file);
         
         return axios.post(
-          'https://sublime-magic-production.up.railway.app/upload', 
+          'https://mern-e-commerce-yjbp.vercel.app/upload', 
           formData,
           {
             headers: {
@@ -100,7 +100,7 @@ const ProductEditModal = ({ show, product, onClose, onSave }) => {
       };
 
       const response = await axios.put(
-        `https://sublime-magic-production.up.railway.app/update/${product._id}`,
+        `https://mern-e-commerce-yjbp.vercel.app/update/${product._id}`,
         updatedProduct,
         {
           headers: {
@@ -121,7 +121,7 @@ const ProductEditModal = ({ show, product, onClose, onSave }) => {
   const getImageUrl = (imagePath) => {
     if (!imagePath) return '';
     if (imagePath.startsWith('http')) return imagePath;
-    return `https://sublime-magic-production.up.railway.app${imagePath}`;
+    return `https://mern-e-commerce-yjbp.vercel.app${imagePath}`;
   };
 
   return (

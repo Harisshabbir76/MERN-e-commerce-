@@ -33,7 +33,7 @@ export default function ContactMessages() {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const res = await axios.get('https://sublime-magic-production.up.railway.app/contactus/show', {
+        const res = await axios.get('https://mern-e-commerce-yjbp.vercel.app/contactus/show', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -61,7 +61,7 @@ export default function ContactMessages() {
   const handleSendReply = async (emailData) => {
     try {
       // Send the reply email
-      await axios.post('https://sublime-magic-production.up.railway.app/contactus/reply', {
+      await axios.post('https://mern-e-commerce-yjbp.vercel.app/contactus/reply', {
         ...emailData,
         messageId: currentMessage._id
       }, {

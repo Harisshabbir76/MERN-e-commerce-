@@ -30,7 +30,7 @@ const SearchResults = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `https://sublime-magic-production.up.railway.app/search?query=${query}`
+          `https://mern-e-commerce-yjbp.vercel.app/search?query=${query}`
         );
         
         const products = response.data.map(product => ({
@@ -62,7 +62,7 @@ const SearchResults = () => {
     if (!product?.image?.[0]) return '/placeholder.jpg';
     return product.image[0].startsWith('http') 
       ? product.image[0] 
-      : `https://sublime-magic-production.up.railway.app${product.image[0]}`;
+      : `https://mern-e-commerce-yjbp.vercel.app${product.image[0]}`;
   };
 
   if (loading) {
@@ -127,7 +127,7 @@ const ProductCard = ({ product, onAddToCart, onViewDetails }) => {
     if (!product?.image?.[0]) return '/placeholder.jpg';
     return product.image[0].startsWith('http') 
       ? product.image[0] 
-      : `https://sublime-magic-production.up.railway.app${product.image[0]}`;
+      : `https://mern-e-commerce-yjbp.vercel.app${product.image[0]}`;
   };
 
   return (

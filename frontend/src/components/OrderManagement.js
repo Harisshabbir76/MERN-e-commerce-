@@ -54,7 +54,7 @@ const OrderManagement = () => {
           return;
         }
 
-        const response = await axios.get('https://sublime-magic-production.up.railway.app/auth/me', {
+        const response = await axios.get('https://mern-e-commerce-yjbp.vercel.app/auth/me', {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -80,7 +80,7 @@ const OrderManagement = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('https://sublime-magic-production.up.railway.app/allOrder');
+      const response = await axios.get('https://mern-e-commerce-yjbp.vercel.app/allOrder');
       setOrders(response.data);
       
       // Calculate counts for each tab
@@ -101,7 +101,7 @@ const OrderManagement = () => {
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      await axios.put(`https://sublime-magic-production.up.railway.app/allOrder/${orderId}/status`, {
+      await axios.put(`https://mern-e-commerce-yjbp.vercel.app/allOrder/${orderId}/status`, {
         status: newStatus
       });
       fetchOrders();

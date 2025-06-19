@@ -70,7 +70,7 @@ export default function Checkout() {
         paymentMethod: 'cash-on-delivery'
       };
 
-      const response = await axios.post('https://sublime-magic-production.up.railway.app/orders', orderData);
+      const response = await axios.post('https://mern-e-commerce-yjbp.vercel.app/orders', orderData);
       
       if (response.status === 201) {
         setShowSuccess(true);

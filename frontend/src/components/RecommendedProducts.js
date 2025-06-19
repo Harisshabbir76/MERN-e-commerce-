@@ -18,7 +18,7 @@ const RecommendedProducts = ({ currentProductId, category }) => {
 
         console.log(`Fetching products for category: ${category}`); // Debug log
         const res = await axios.get(
-          `https://sublime-magic-production.up.railway.app/catalog?category=${encodeURIComponent(category)}`
+          `https://mern-e-commerce-yjbp.vercel.app/catalog?category=${encodeURIComponent(category)}`
         );
 
         console.log('API response:', res.data); // Debug log
@@ -84,7 +84,7 @@ const RecommendedProducts = ({ currentProductId, category }) => {
           // Handle image URL
           const imageUrl = product.image?.[0]?.startsWith('http') 
             ? product.image[0] 
-            : `https://sublime-magic-production.up.railway.app${product.image?.[0] || ''}`;
+            : `https://mern-e-commerce-yjbp.vercel.app${product.image?.[0] || ''}`;
 
           return (
             <Col key={product._id} xs={6} md={3}>

@@ -22,7 +22,7 @@ export default function CategoryProducts() {
 
     const fetchProducts = async () => {
       try {
-        const res = await axios.get(`https://sublime-magic-production.up.railway.app/category/${encodeURIComponent(categoryName)}`);
+        const res = await axios.get(`https://mern-e-commerce-yjbp.vercel.app/category/${encodeURIComponent(categoryName)}`);
         const productsWithDefaults = res.data.map(product => ({
           ...product,
           stock: product.stock !== undefined ? product.stock : Math.floor(Math.random() * 16) + 5,
@@ -81,7 +81,7 @@ export default function CategoryProducts() {
   const getProductImage = (product) => {
     if (!product?.image?.[0]) return '/placeholder.jpg';
     if (product.image[0].startsWith('http')) return product.image[0];
-    return `https://sublime-magic-production.up.railway.app${product.image[0]}`;
+    return `https://mern-e-commerce-yjbp.vercel.app${product.image[0]}`;
   };
 
   return (

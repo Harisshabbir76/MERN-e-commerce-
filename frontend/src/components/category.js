@@ -27,7 +27,7 @@ export default function Category() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await axios.get('https://sublime-magic-production.up.railway.app/categories');
+        const res = await axios.get('https://mern-e-commerce-yjbp.vercel.app/categories');
         setCategories(res.data);
       } catch (err) {
         setError(err);

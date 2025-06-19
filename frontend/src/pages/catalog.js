@@ -27,7 +27,7 @@ export default function Catalog() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get('https://sublime-magic-production.up.railway.app/catalog');
+        const res = await axios.get('https://mern-e-commerce-yjbp.vercel.app/catalog');
         const data = res.data;
 
         let products = [];
@@ -97,7 +97,7 @@ export default function Catalog() {
   const getProductImage = (product) => {
     if (!product?.image?.[0]) return '/placeholder.jpg';
     if (product.image[0].startsWith('http')) return product.image[0];
-    return `https://sublime-magic-production.up.railway.app${product.image[0]}`;
+    return `https://mern-e-commerce-yjbp.vercel.app${product.image[0]}`;
   };
 
   const handleAddToCart = (product) => {
