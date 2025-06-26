@@ -29,7 +29,7 @@ const NewArrivals = () => {
   useEffect(() => {
     const fetchNewArrivals = async () => {
       try {
-        const response = await axios.get('https://mern-e-commerce-yjbp.vercel.app/new-arrival');
+        const response = await axios.get('https://mern-e-commerce-production-10a6.up.railway.app/new-arrival');
         const productsWithDefaults = response.data.map(product => ({
           ...product,
           stock: product.stock !== undefined ? product.stock : Math.floor(Math.random() * 16) + 5,

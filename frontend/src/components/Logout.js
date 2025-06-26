@@ -9,7 +9,7 @@ export default function Logout() {
     useEffect(() => {
         const logout = async () => {
             try {
-                await axios.get('https://mern-e-commerce-yjbp.vercel.app/logout');
+                await axios.get('hhttps://mern-e-commerce-production-10a6.up.railway.app/logout');
                 localStorage.removeItem('token');
                 localStorage.removeItem('userEmail');
                 navigate('/login');

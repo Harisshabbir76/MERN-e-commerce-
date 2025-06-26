@@ -52,7 +52,7 @@ export default function AddProduct() {
     }
 
     try {
-      await axios.post('https://mern-e-commerce-yjbp.vercel.app/dashboard/add-product', data, {
+      await axios.post('https://mern-e-commerce-production-10a6.up.railway.app/dashboard/add-product', data, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -85,7 +85,7 @@ export default function AddProduct() {
           return;
         }
         
-        const response = await axios.get('https://mern-e-commerce-yjbp.vercel.app/auth/me', {
+        const response = await axios.get('https://mern-e-commerce-production-10a6.up.railway.app/auth/me', {
           headers: {
             Authorization: `Bearer ${token}`
           }

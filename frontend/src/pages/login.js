@@ -21,7 +21,7 @@ export default function Login() {
     setError(null);
 
     try {
-      const res = await axios.post('https://mern-e-commerce-yjbp.vercel.app/login', {
+      const res = await axios.post('https://mern-e-commerce-production-10a6.up.railway.app/login', {
         email,
         password
       });

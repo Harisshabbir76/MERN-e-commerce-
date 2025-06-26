@@ -20,7 +20,7 @@ export default function Dashboard() {
                 }
 
                 // Verify token and get user data
-                const response = await axios.get('https://mern-e-commerce-yjbp.vercel.app/auth/me', {
+                const response = await axios.get('https://mern-e-commerce-production-10a6.up.railway.app/auth/me', {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }

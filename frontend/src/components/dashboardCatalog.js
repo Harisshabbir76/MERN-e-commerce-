@@ -34,12 +34,12 @@ export default function AdminProductsDashboard() {
     const fetchData = async () => {
       try {
         const [productsRes, categoriesRes] = await Promise.all([
-          axios.get('https://mern-e-commerce-yjbp.vercel.app/catalog', {
+          axios.get('https://mern-e-commerce-production-10a6.up.railway.app/catalog', {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
             }
           }),
-          axios.get('https://mern-e-commerce-yjbp.vercel.app/categories', {
+          axios.get('https://mern-e-commerce-production-10a6.up.railway.app/categories', {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
             }
@@ -91,7 +91,7 @@ export default function AdminProductsDashboard() {
         setFilteredProducts(products);
       } else {
         const res = await axios.get(
-          `https://mern-e-commerce-yjbp.vercel.app/category/${category}`,
+          `https://mern-e-commerce-production-10a6.up.railway.app/category/${category}`,
           {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
@@ -110,7 +110,7 @@ export default function AdminProductsDashboard() {
   const getProductImage = (product) => {
     if (!product?.image?.[0]) return '/placeholder.jpg';
     if (product.image[0].startsWith('http')) return product.image[0];
-    return `https://mern-e-commerce-yjbp.vercel.app${product.image[0]}`;
+    return `https://mern-e-commerce-production-10a6.up.railway.app${product.image[0]}`;
   };
 
   const handleEdit = (product) => {
@@ -126,7 +126,7 @@ export default function AdminProductsDashboard() {
   const confirmDelete = async () => {
     try {
       await axios.delete(
-        `https://mern-e-commerce-yjbp.vercel.app/delete/${selectedProduct._id}`,
+        `https://mern-e-commerce-production-10a6.up.railway.app/delete/${selectedProduct._id}`,
         {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('adminToken')}`

@@ -53,7 +53,7 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.get('https://mern-e-commerce-yjbp.vercel.app/logout');
+      await axios.get('https://mern-e-commerce-production-10a6.up.railway.app/logout');
       localStorage.removeItem('token');
       localStorage.removeItem('userEmail');
       setIsLoggedIn(false);

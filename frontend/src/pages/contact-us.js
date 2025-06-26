@@ -103,7 +103,7 @@ const ContactUs = () => {
     setIsSubmitting(true);
     
     try {
-      const response = await axios.post("https://mern-e-commerce-yjbp.vercel.app/contactUs", formData);
+      const response = await axios.post("https://mern-e-commerce-production-10a6.up.railway.app/contactUs", formData);
       showSuccessPopup(response.data.message || "Thank you for your message!");
       setFormData({ name: "", email: "", subject: "", message: "" });
     } catch (error) {

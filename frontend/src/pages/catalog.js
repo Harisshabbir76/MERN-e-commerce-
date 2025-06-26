@@ -27,7 +27,7 @@ export default function Catalog() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get('https://mern-e-commerce-yjbp.vercel.app/catalog');
+        const res = await axios.get('https://mern-e-commerce-production-10a6.up.railway.app/catalog');
         const data = res.data;
 
         let products = [];

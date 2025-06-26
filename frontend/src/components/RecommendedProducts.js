@@ -18,7 +18,7 @@ const RecommendedProducts = ({ currentProductId, category }) => {
 
         console.log(`Fetching products for category: ${category}`); // Debug log
         const res = await axios.get(
-          `https://mern-e-commerce-yjbp.vercel.app/catalog?category=${encodeURIComponent(category)}`
+          `https://mern-e-commerce-production-10a6.up.railway.app/catalog?category=${encodeURIComponent(category)}`
         );
 
         console.log('API response:', res.data); // Debug log
