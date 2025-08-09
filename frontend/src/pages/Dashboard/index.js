@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Container, Spinner, Button } from 'react-bootstrap';
 
 export default function Dashboard() {
     const navigate = useNavigate();
-    const location = useLocation();
     const [isLoading, setIsLoading] = useState(true);
     const [isAuthorized, setIsAuthorized] = useState(false);
 
@@ -25,13 +24,9 @@ export default function Dashboard() {
                     }
                 });
 
-                // Case-sensitive check matching OrderManagement
+                // Check authorization without redirect
                 if (response.data.user?.email === 'Haris99@gmail.com') {
                     setIsAuthorized(true);
-                    // Redirect to order management if accessing root dashboard
-                    if (location.pathname === '/dashboard') {
-                        navigate('/dashboard/order-management');
-                    }
                 } else {
                     navigate('/');
                 }
@@ -45,7 +40,7 @@ export default function Dashboard() {
         };
 
         checkAuth();
-    }, [navigate, location.pathname]);
+    }, [navigate]);
 
     if (isLoading) {
         return (
@@ -57,18 +52,41 @@ export default function Dashboard() {
     }
 
     if (!isAuthorized) {
-        return null;
+        return (
+            <Container className="text-center py-5">
+                <h2>Access Denied</h2>
+                <p>You don't have permission to access this page.</p>
+                <Button variant="primary" onClick={() => navigate('/')}>
+                    Return to Home
+                </Button>
+            </Container>
+        );
     }
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        navigate('/login');
+    };
 
     return (
         <Container className="py-5">
-            <h1 className="mb-4">Admin Dashboard</h1>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h1>Admin Dashboard</h1>
+                <Button 
+                    variant="danger" 
+                    onClick={handleLogout}
+                    className="ms-3"
+                >
+                    Logout
+                </Button>
+            </div>
+            
             <div className="d-flex flex-wrap gap-3">
                 <Button 
                     variant="primary" 
                     size="lg"
                     onClick={() => navigate('/dashboard/add-product')}
-                    className="p-4"
+                    className="p-4 flex-grow-1"
                 >
                     Add New Product
                 </Button>
@@ -76,7 +94,7 @@ export default function Dashboard() {
                     variant="success" 
                     size="lg"
                     onClick={() => navigate('/dashboard/order-management')}
-                    className="p-4"
+                    className="p-4 flex-grow-1"
                 >
                     Order Management
                 </Button>
@@ -84,7 +102,7 @@ export default function Dashboard() {
                     variant="info" 
                     size="lg"
                     onClick={() => navigate('/dashboard/contactus')}
-                    className="p-4"
+                    className="p-4 flex-grow-1"
                 >
                     Customer Messages
                 </Button>
@@ -92,17 +110,17 @@ export default function Dashboard() {
                     variant="info" 
                     size="lg"
                     onClick={() => navigate('/dashboard/catalog')}
-                    className="p-4"
+                    className="p-4 flex-grow-1"
                 >
-                    Products
+                    Products Catalog
                 </Button>
                 <Button 
                     variant="info" 
                     size="lg"
                     onClick={() => navigate('/dashboard/analytics')}
-                    className="p-4"
+                    className="p-4 flex-grow-1"
                 >
-                    Analytics
+                    Sales Analytics
                 </Button>
             </div>
         </Container>
