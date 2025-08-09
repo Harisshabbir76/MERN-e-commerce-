@@ -25,7 +25,8 @@ export default function Dashboard() {
                     }
                 });
 
-                if (response.data.user?.email?.toLowerCase() === 'Haris99@gmail.com') {
+                // Case-sensitive check matching OrderManagement
+                if (response.data.user?.email === 'Haris99@gmail.com') {
                     setIsAuthorized(true);
                     // Redirect to order management if accessing root dashboard
                     if (location.pathname === '/dashboard') {
