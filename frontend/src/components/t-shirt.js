@@ -16,7 +16,7 @@ export default function TshirtProducts() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get('https://mern-e-commerce-production-10a6.up.railway.app/catalog');
+        const res = await axios.get('https://mern-e-commerce-f9ra.onrender.com/catalog');
         const data = res.data;
 
         console.log('API response:', data);

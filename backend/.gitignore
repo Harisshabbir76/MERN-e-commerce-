@@ -1,0 +1,23 @@
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# dotenv environment variables file
+.env
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Optional: coverage folder if you do testing
+coverage/
+
+# Optional: build folder if any
+dist/
+build/

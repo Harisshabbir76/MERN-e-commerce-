@@ -28,7 +28,7 @@ export default function Category() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await axios.get('https://mern-e-commerce-production-10a6.up.railway.app/categories');
+        const res = await axios.get('https://mern-e-commerce-f9ra.onrender.com/categories');
         
         if (!res || !res.data) {
           throw new Error('No data received from server');

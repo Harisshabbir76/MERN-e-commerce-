@@ -22,7 +22,7 @@ export default function CategoryProducts() {
 
     const fetchProducts = async () => {
       try {
-        const res = await axios.get(`https://mern-e-commerce-production-10a6.up.railway.app/category/${encodeURIComponent(categoryName)}`);
+        const res = await axios.get(`https://mern-e-commerce-f9ra.onrender.com/category/${encodeURIComponent(categoryName)}`);
         const productsWithDefaults = res.data.map(product => ({
           ...product,
           stock: product.stock !== undefined ? product.stock : Math.floor(Math.random() * 16) + 5,

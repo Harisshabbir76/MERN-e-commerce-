@@ -24,7 +24,7 @@ export default function Signup() {
     setError(null);
 
     try {
-      const res = await axios.post('https://mern-e-commerce-production-10a6.up.railway.app/signup', {
+      const res = await axios.post('https://mern-e-commerce-f9ra.onrender.com/signup', {
         name,
         email,
         password,

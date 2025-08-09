@@ -30,7 +30,7 @@ const SearchResults = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `https://mern-e-commerce-production-10a6.up.railway.app/search?query=${query}`
+          `https://mern-e-commerce-f9ra.onrender.com/search?query=${query}`
         );
         
         const products = response.data.map(product => ({

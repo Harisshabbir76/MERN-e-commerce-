@@ -55,7 +55,7 @@ const ProductEditModal = ({ show, product, onClose, onSave }) => {
         formData.append('image', file);
         
         return axios.post(
-          'https://mern-e-commerce-production-10a6.up.railway.app/upload', 
+          'https://mern-e-commerce-f9ra.onrender.com/upload', 
           formData,
           {
             headers: {
@@ -100,7 +100,7 @@ const ProductEditModal = ({ show, product, onClose, onSave }) => {
       };
 
       const response = await axios.put(
-        `https://mern-e-commerce-production-10a6.up.railway.app/update/${product._id}`,
+        `https://mern-e-commerce-f9ra.onrender.com/update/${product._id}`,
         updatedProduct,
         {
           headers: {
@@ -121,7 +121,7 @@ const ProductEditModal = ({ show, product, onClose, onSave }) => {
   const getImageUrl = (imagePath) => {
     if (!imagePath) return '';
     if (imagePath.startsWith('http')) return imagePath;
-    return `https://mern-e-commerce-production-10a6.up.railway.app${imagePath}`;
+    return `https://mern-e-commerce-f9ra.onrender.com${imagePath}`;
   };
 
   return (

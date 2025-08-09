@@ -16,7 +16,7 @@ const ReviewForm = ({ productId, onReviewSubmit }) => {
     
     try {
       await axios.post(
-        'https://mern-e-commerce-production-10a6.up.railway.app/api/reviews',
+        'https://mern-e-commerce-f9ra.onrender.com/api/reviews',
         { 
           product: productId, 
           userName,

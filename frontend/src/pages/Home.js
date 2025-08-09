@@ -6,7 +6,6 @@ import HeroSlider from '../components/HeroSlider'
 import { useEffect, useState } from 'react';
 import Tshirt from '../components/t-shirt'
 import Bottom from '../components/bottom'
-// import ContactUs from '../components/ContactUs'
 import ContactUs from './contact-us'
 
 
