@@ -60,7 +60,7 @@ const OrderManagement = () => {
           }
         });
 
-        if (response.data.user.email === 'Admin@gmail.com') {
+        if (response.data.user.email === 'Haris99@gmail.com') {
           setIsAuthorized(true);
           fetchOrders();
         } else {

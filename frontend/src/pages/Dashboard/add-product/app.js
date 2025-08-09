@@ -91,7 +91,7 @@ export default function AddProduct() {
           }
         });
 
-        if (response.data.user?.email?.toLowerCase() === 'admin@gmail.com') {
+        if (response.data.user?.email?.toLowerCase() === 'Haris99@gmail.com') {
           setIsAuthorized(true);
         } else {
           navigate('/404');

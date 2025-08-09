@@ -27,7 +27,7 @@ export default function Dashboard() {
                 });
 
                 // Check if user is admin (case-insensitive)
-                if (response.data.user.email.toLowerCase() === 'admin@gmail.com') {
+                if (response.data.user.email.toLowerCase() === 'Haris99@gmail.com') {
                     setIsAuthorized(true);
                 } else {
                     navigate('/');
