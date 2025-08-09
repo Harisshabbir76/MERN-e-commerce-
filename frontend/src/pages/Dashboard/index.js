@@ -114,14 +114,7 @@ export default function Dashboard() {
                 >
                     Products Catalog
                 </Button>
-                <Button 
-                    variant="info" 
-                    size="lg"
-                    onClick={() => navigate('/dashboard/analytics')}
-                    className="p-4 flex-grow-1"
-                >
-                    Sales Analytics
-                </Button>
+                
             </div>
         </Container>
     );
