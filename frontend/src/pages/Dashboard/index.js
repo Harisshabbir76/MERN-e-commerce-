@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { Container, Spinner, Button } from 'react-bootstrap';
 
 export default function Dashboard() {
     const navigate = useNavigate();
+    const location = useLocation();
     const [isLoading, setIsLoading] = useState(true);
     const [isAuthorized, setIsAuthorized] = useState(false);
 
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                // Get token from localStorage
                 const token = localStorage.getItem('token');
                 
                 if (!token) {
@@ -19,16 +19,18 @@ export default function Dashboard() {
                     return;
                 }
 
-                // Verify token and get user data
                 const response = await axios.get('https://mern-e-commerce-f9ra.onrender.com/auth/me', {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
                 });
 
-                // Check if user is admin (case-insensitive)
-                if (response.data.user.email.toLowerCase() === 'Haris99@gmail.com') {
+                if (response.data.user?.email?.toLowerCase() === 'Haris99@gmail.com') {
                     setIsAuthorized(true);
+                    // Redirect to order management if accessing root dashboard
+                    if (location.pathname === '/dashboard') {
+                        navigate('/dashboard/order-management');
+                    }
                 } else {
                     navigate('/');
                 }
@@ -42,7 +44,7 @@ export default function Dashboard() {
         };
 
         checkAuth();
-    }, [navigate]);
+    }, [navigate, location.pathname]);
 
     if (isLoading) {
         return (
@@ -54,7 +56,7 @@ export default function Dashboard() {
     }
 
     if (!isAuthorized) {
-        return null; // Redirect will happen in useEffect
+        return null;
     }
 
     return (
@@ -85,7 +87,6 @@ export default function Dashboard() {
                 >
                     Customer Messages
                 </Button>
-
                 <Button 
                     variant="info" 
                     size="lg"
@@ -94,7 +95,6 @@ export default function Dashboard() {
                 >
                     Products
                 </Button>
-
                 <Button 
                     variant="info" 
                     size="lg"
@@ -103,10 +103,7 @@ export default function Dashboard() {
                 >
                     Analytics
                 </Button>
-
             </div>
-
-            
         </Container>
     );
 }
